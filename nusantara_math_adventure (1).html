@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nusantara Math Adventure: Misi Sabang Sampai Merauke</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tone.js untuk Efek Suara & Musik Latar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Google Fonts: Fredoka & Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #e0f2fe;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .font-display {
+            font-family: 'Fredoka', sans-serif;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.9)); }
+            50% { transform: scale(1.12); filter: drop-shadow(0 0 14px rgba(250, 204, 21, 1)); }
+        }
+        .pos-active {
+            animation: pulseGlow 1.8s infinite ease-in-out;
+            cursor: pointer;
+        }
+        @keyframes shipFloat {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50% { transform: translateY(-5px) rotate(2deg); }
+        }
+        .ship-bobbing {
+            animation: shipFloat 2.4s infinite ease-in-out;
+        }
+        @keyframes spinGasing {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spin-toy {
+            display: inline-block;
+            animation: spinGasing 3s linear infinite;
+        }
+        #ship-group {
+            transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-3d {
+            transition: all 0.15s ease;
+        }
+        .btn-3d:active {
+            transform: translateY(3px);
+        }
+        /* Print Styles untuk Sertifikat */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #certificate-modal, #certificate-area, #certificate-area * {
+                visibility: visible;
+            }
+            #certificate-modal {
+                position: fixed;
+                inset: 0;
+                background: white !important;
+                padding: 0 !important;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+            #certificate-area {
+                box-shadow: none !important;
+                border: 8px double #d97706 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 selection:bg-amber-300">
+
+    <!-- ==================== LAYAR SELAMAT DATANG & PILIH KELAS ==================== -->
+    <div id="welcome-screen" class="fixed inset-0 z-50 bg-gradient-to-br from-sky-500 via-cyan-600 to-teal-700 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border-4 border-amber-400 text-center relative my-auto">
+            <div class="inline-flex items-center gap-2 bg-amber-100 text-amber-800 font-bold px-3 py-1 rounded-full text-xs sm:text-sm mb-3 border border-amber-300">
+                <span>🇮🇩</span>
+                <span>Kurikulum Merdeka • Kelas 1 - 6 SD</span>
+            </div>
+            <h1 class="font-display text-3xl sm:text-4xl font-bold text-sky-900 mb-2 leading-tight">
+                Nusantara Math Adventure
+            </h1>
+            <p class="text-slate-600 text-sm sm:text-base mb-5">
+                Berlayar dari <b>Sabang sampai Merauke</b>! Taklukkan tantangan matematika di 7 kepulauan Nusantara, kenali ragam budayanya, dan raih <b>Sertifikat Penjelajah Nusantara</b>!
+            </p>
+
+            <!-- Input Nama & Pilih Kelas -->
+            <div class="text-left space-y-4">
+                <div>
+                    <label for="player-name-input" class="block text-xs sm:text-sm font-extrabold text-slate-700 mb-1">
+                        🧑‍✈️ Nama Lengkap Kapten Penjelajah:
+                    </label>
+                    <input type="text" id="player-name-input" placeholder="Contoh: Aisyah Putri / Budi Santoso"
+                        class="w-full px-4 py-3 rounded-2xl border-2 border-sky-200 focus:border-sky-500 focus:outline-none text-base font-bold text-slate-800 bg-sky-50/50">
+                    <p id="name-error" class="hidden text-xs font-bold text-rose-600 mt-1">
+                        ⚠️ Yuk isi nama lengkapmu dulu sebelum berlayar!
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-xs sm:text-sm font-extrabold text-slate-700 mb-1.5">
+                        📚 Pilih Jenjang Kelas (Kurikulum Merdeka):
+                    </label>
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                        <button type="button" onclick="selectWelcomeGrade(1)" data-grade="1" class="grade-select-btn bg-slate-100 hover:bg-amber-100 border-2 border-slate-200 text-slate-700 font-display font-bold py-2 px-1 rounded-xl text-xs sm:text-sm transition">Kelas 1</button>
+                        <button type="button" onclick="selectWelcomeGrade(2)" data-grade="2" class="grade-select-btn bg-slate-100 hover:bg-amber-100 border-2 border-slate-200 text-slate-700 font-display font-bold py-2 px-1 rounded-xl text-xs sm:text-sm transition">Kelas 2</button>
+                        <button type="button" onclick="selectWelcomeGrade(3)" data-grade="3" class="grade-select-btn bg-amber-400 border-2 border-amber-600 text-amber-950 font-display font-bold py-2 px-1 rounded-xl text-xs sm:text-sm shadow-sm scale-105 transition">Kelas 3</button>
+                        <button type="button" onclick="selectWelcomeGrade(4)" data-grade="4" class="grade-select-btn bg-slate-100 hover:bg-amber-100 border-2 border-slate-200 text-slate-700 font-display font-bold py-2 px-1 rounded-xl text-xs sm:text-sm transition">Kelas 4</button>
+                        <button type="button" onclick="selectWelcomeGrade(5)" data-grade="5" class="grade-select-btn bg-slate-100 hover:bg-amber-100 border-2 border-slate-200 text-slate-700 font-display font-bold py-2 px-1 rounded-xl text-xs sm:text-sm transition">Kelas 5</button>
+                        <button type="button" onclick="selectWelcomeGrade(6)" data-grade="6" class="grade-select-btn bg-slate-100 hover:bg-amber-100 border-2 border-slate-200 text-slate-700 font-display font-bold py-2 px-1 rounded-xl text-xs sm:text-sm transition">Kelas 6</button>
+                    </div>
+                    <div id="grade-desc-box" class="mt-2 bg-indigo-50 border border-indigo-200 rounded-xl p-2.5 text-xs text-center">
+                        <span class="font-bold text-indigo-800">Kelas 3 SD (Fase B)</span> • <span class="text-slate-600">Misi Utama Perkalian 4 sampai 10 & Tantangan Campuran Nusantara</span>
+                    </div>
+                </div>
+
+                <!-- Banner Jika Dibuka Melalui Link Khusus Guru -->
+                <div id="invite-link-banner" class="hidden bg-emerald-50 border-2 border-emerald-400 rounded-2xl p-3 text-center">
+                    <span class="text-xs font-extrabold text-emerald-800 uppercase block">🔗 Undangan Kelas Khusus</span>
+                    <p id="invite-link-desc" class="text-xs sm:text-sm font-bold text-emerald-950 mt-0.5"></p>
+                </div>
+
+                <button type="button" onclick="startAdventure()" class="btn-3d w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-display font-bold text-xl py-3.5 rounded-2xl shadow-[0_6px_0_#065f46] flex items-center justify-center gap-2">
+                    <span>Mulai Berlayar!</span>
+                    <span class="text-2xl">🚀</span>
+                </button>
+
+                <!-- Akses Login Admin / Guru di Layar Awal -->
+                <div class="pt-3 border-t border-slate-200 flex items-center justify-center">
+                    <button type="button" onclick="openAdminLoginModal()" class="text-xs sm:text-sm font-bold text-slate-600 hover:text-indigo-700 flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-indigo-50 transition">
+                        <span>👩‍🏫</span>
+                        <span>Login Admin / Guru (Pantau Aktivitas Siswa)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== HEADER UTAMA ==================== -->
+    <header class="bg-white/95 backdrop-blur border-b-4 border-amber-400 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2">
+            <!-- Identitas Kapten -->
+            <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow">
+                    ⛵
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-xs font-bold text-slate-500">Kapten:</span>
+                        <span id="header-player-name" class="font-display font-bold text-sky-900 text-sm sm:text-base">Penjelajah</span>
+                        <select id="header-grade-select" onchange="changeGradeFromHeader(this.value)" title="Ganti Jenjang Kelas"
+                            class="bg-indigo-100 text-indigo-900 border border-indigo-300 font-bold text-xs px-2 py-0.5 rounded-lg cursor-pointer focus:outline-none">
+                            <option value="1">Kelas 1 SD</option>
+                            <option value="2">Kelas 2 SD</option>
+                            <option value="3" selected>Kelas 3 SD</option>
+                            <option value="4">Kelas 4 SD</option>
+                            <option value="5">Kelas 5 SD</option>
+                            <option value="6">Kelas 6 SD</option>
+                        </select>
+                    </div>
+                    <p id="header-curriculum-badge" class="text-[11px] font-bold text-teal-700">Kurikulum Merdeka • Fase B</p>
+                </div>
+            </div>
+
+            <!-- Kontrol Bintang, Suara, Sertifikat, Admin & Reset -->
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <!-- Skor Bintang -->
+                <div class="bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                    <span class="text-base sm:text-lg">⭐</span>
+                    <span id="total-stars" class="font-display font-bold text-amber-900 text-sm sm:text-base">0 / 21</span>
+                </div>
+
+                <!-- Tombol Musik Latar -->
+                <button id="btn-toggle-bgm" onclick="toggleBGM()" title="Musik Latar Nusantara" class="bg-sky-100 hover:bg-sky-200 text-sky-900 border-2 border-sky-300 font-bold text-xs px-2.5 py-1.5 rounded-xl flex items-center gap-1 transition">
+                    <span id="bgm-icon">🎵</span>
+                    <span class="hidden md:inline" id="bgm-label">Musik</span>
+                </button>
+
+                <!-- Tombol Narator Bersuara -->
+                <button id="btn-toggle-tts" onclick="toggleTTS()" title="Suara Narator" class="bg-teal-100 hover:bg-teal-200 text-teal-900 border-2 border-teal-300 font-bold text-xs px-2.5 py-1.5 rounded-xl flex items-center gap-1 transition">
+                    <span id="tts-icon">🔊</span>
+                    <span class="hidden md:inline" id="tts-label">Narator</span>
+                </button>
+
+                <!-- Tombol Sertifikat (Muncul jika sudah tamat) -->
+                <button id="btn-open-cert" onclick="openCertificateModal()" class="hidden btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-display font-bold text-xs sm:text-sm px-3 py-2 rounded-xl shadow-[0_3px_0_#065f46] flex items-center gap-1">
+                    <span>🏆</span>
+                    <span class="hidden sm:inline">Sertifikat</span>
+                </button>
+
+                <!-- Tombol Panel Admin / Guru -->
+                <button onclick="openAdminLoginModal()" title="Login Admin / Guru" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 border-2 border-indigo-300 font-display font-bold text-xs px-2.5 py-1.5 rounded-xl flex items-center gap-1 transition">
+                    <span>👩‍🏫</span>
+                    <span class="hidden lg:inline">Admin</span>
+                </button>
+
+                <!-- Tombol Reset -->
+                <button onclick="confirmReset()" title="Ulangi Permainan" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs px-2.5 py-2 rounded-xl border border-slate-300">
+                    🔄
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== KONTEN UTAMA: PETA & DAFTAR POS ==================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 space-y-5">
+        <!-- Banner Status Misi -->
+        <div class="bg-gradient-to-r from-indigo-600 via-sky-600 to-teal-600 rounded-2xl p-4 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">🧭</span>
+                <div>
+                    <h2 id="mission-banner-title" class="font-display font-bold text-lg sm:text-xl">Misi Sabang Sampai Merauke</h2>
+                    <p id="mission-banner-subtitle" class="text-xs sm:text-sm text-sky-100">Klik pulau yang berkilau pada peta atau kartu pos di bawah untuk berlayar!</p>
+                </div>
+            </div>
+            <div class="bg-white/20 backdrop-blur px-4 py-2 rounded-xl text-center shrink-0">
+                <span class="text-xs uppercase font-bold text-sky-100 block">Progres Pulau</span>
+                <span id="progress-text" class="font-display font-bold text-lg">0 / 7 Pulau</span>
+            </div>
+        </div>
+
+        <!-- Peta Interaktif Indonesia (SVG) -->
+        <section class="bg-gradient-to-b from-sky-300 via-sky-200 to-cyan-200 rounded-3xl p-3 sm:p-5 border-4 border-white shadow-xl relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2 px-1">
+                <span class="bg-white/90 text-sky-900 font-display font-bold text-xs sm:text-sm px-3 py-1 rounded-full shadow-sm">
+                    🗺️ Peta Kepulauan Nusantara
+                </span>
+                <span class="bg-amber-400 text-amber-950 font-bold text-xs px-3 py-1 rounded-full shadow-sm">
+                    Sabang ➔ Merauke
+                </span>
+            </div>
+
+            <div class="w-full overflow-x-auto">
+                <svg id="indonesia-map" viewBox="0 0 1000 420" class="w-full h-auto min-w-[640px] select-none">
+                    <!-- Garis Khatulistiwa -->
+                    <line x1="0" y1="205" x2="1000" y2="205" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="8,6" opacity="0.5"/>
+                    <text x="15" y="198" fill="#0369a1" font-size="11" font-weight="bold" opacity="0.7">Garis Khatulistiwa (0°)</text>
+
+                    <!-- Pulau-Pulau Indonesia (Ilustrasi Kartun) -->
+                    <!-- Sumatra -->
+                    <path d="M 65,95 L 130,85 L 225,185 L 245,245 L 210,268 L 155,215 L 85,140 Z" fill="#4ade80" stroke="#15803d" stroke-width="3" stroke-linejoin="round"/>
+                    <!-- Jawa -->
+                    <path d="M 255,285 L 365,292 L 435,305 L 430,325 L 340,320 L 250,305 Z" fill="#4ade80" stroke="#15803d" stroke-width="3" stroke-linejoin="round"/>
+                    <!-- Kalimantan -->
+                    <path d="M 340,115 L 435,95 L 505,135 L 495,215 L 420,235 L 345,205 Z" fill="#4ade80" stroke="#15803d" stroke-width="3" stroke-linejoin="round"/>
+                    <!-- Sulawesi -->
+                    <path d="M 545,145 L 625,135 L 615,165 L 580,175 L 615,215 L 595,240 L 565,210 L 550,245 L 530,235 L 538,180 Z" fill="#4ade80" stroke="#15803d" stroke-width="3" stroke-linejoin="round"/>
+                    <!-- Bali & Nusa Tenggara -->
+                    <path d="M 450,312 L 485,314 L 483,328 L 448,326 Z" fill="#4ade80" stroke="#15803d" stroke-width="2.5"/>
+                    <path d="M 500,315 L 555,317 L 552,330 L 498,328 Z" fill="#4ade80" stroke="#15803d" stroke-width="2.5"/>
+                    <path d="M 570,318 L 655,312 L 650,332 L 568,332 Z" fill="#4ade80" stroke="#15803d" stroke-width="2.5"/>
+                    <!-- Maluku -->
+                    <path d="M 685,140 L 715,135 L 720,175 L 690,180 Z" fill="#4ade80" stroke="#15803d" stroke-width="2.5"/>
+                    <path d="M 675,210 L 735,205 L 738,225 L 678,228 Z" fill="#4ade80" stroke="#15803d" stroke-width="2.5"/>
+                    <!-- Papua -->
+                    <path d="M 765,175 L 815,165 L 855,195 L 945,205 L 945,305 L 875,295 L 835,250 L 785,220 Z" fill="#4ade80" stroke="#15803d" stroke-width="3" stroke-linejoin="round"/>
+
+                    <!-- Jalur Pelayaran Putus-Putus -->
+                    <path d="M 165,180 Q 245,250 345,302 Q 395,235 425,170 Q 500,165 568,192 Q 555,265 545,318 Q 635,255 705,195 Q 785,210 865,238"
+                        fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="10,8" stroke-linecap="round"/>
+
+                    <!-- Wadah Pin Pos (Dirender oleh JS) -->
+                    <g id="map-pins-layer"></g>
+
+                    <!-- Kapal Penjelajah Virtual -->
+                    <g id="ship-group" transform="translate(165, 145)">
+                        <g class="ship-bobbing">
+                            <ellipse cx="0" cy="18" rx="22" ry="6" fill="#0284c7" opacity="0.35"/>
+                            <path d="M -22,6 L 22,6 L 14,18 L -14,18 Z" fill="#92400e" stroke="#451a03" stroke-width="2"/>
+                            <line x1="0" y1="6" x2="0" y2="-22" stroke="#451a03" stroke-width="3"/>
+                            <path d="M 2,-20 L 20,-4 L 2,2 Z" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+                            <path d="M -2,-16 L -16,-2 L -2,2 Z" fill="#fde68a" stroke="#d97706" stroke-width="1.5"/>
+                            <text x="0" y="-25" text-anchor="middle" font-size="12">🇮🇩</text>
+                        </g>
+                    </g>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Grid 7 Pos Kepulauan & Ragam Budaya -->
+        <section>
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-display font-bold text-xl sm:text-2xl text-sky-950 flex items-center gap-2">
+                    <span>🏝️</span>
+                    <span>7 Pos Petualangan & Budaya Nusantara</span>
+                </h3>
+            </div>
+            <div id="pos-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- Kartu Pos dirender oleh JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- ==================== MODAL PERMAINAN / SOAL POS ==================== -->
+    <div id="game-modal" class="fixed inset-0 z-40 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border-4 border-amber-400 overflow-hidden my-auto">
+            <!-- Header Modal Pos -->
+            <div id="modal-header-bg" class="bg-gradient-to-r from-amber-500 to-orange-500 p-4 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span id="modal-pos-icon" class="text-3xl sm:text-4xl bg-white/20 p-2 rounded-2xl">🪀</span>
+                    <div>
+                        <span id="modal-pos-badge" class="text-xs font-extrabold uppercase tracking-wider bg-black/20 px-2.5 py-0.5 rounded-full">Pos 1 • Sumatra</span>
+                        <h3 id="modal-pos-title" class="font-display font-bold text-xl sm:text-2xl leading-tight">Permainan Gasing</h3>
+                    </div>
+                </div>
+                <button onclick="closeGameModal()" class="bg-white/20 hover:bg-white/30 text-white w-9 h-9 rounded-full font-bold text-lg">✕</button>
+            </div>
+
+            <!-- Isi Modal Soal -->
+            <div class="p-4 sm:p-6">
+                <!-- Progres Soal & Tombol Bantuan Kakak Pintar -->
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span id="question-counter" class="bg-sky-100 text-sky-900 font-bold text-xs sm:text-sm px-3 py-1 rounded-full">Soal 1 dari 3</span>
+                        <button onclick="readCurrentQuestionAloud()" title="Bacakan Soal" class="bg-teal-100 hover:bg-teal-200 text-teal-900 font-bold text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <span>🔊</span>
+                            <span>Bacakan</span>
+                        </button>
+                    </div>
+                    <button onclick="openHelperModal()" class="btn-3d bg-amber-400 hover:bg-amber-500 text-amber-950 font-display font-bold text-xs sm:text-sm px-3.5 py-1.5 rounded-full shadow-[0_3px_0_#b45309] flex items-center gap-1.5">
+                        <span>💡</span>
+                        <span>Bantuan Kakak Pintar</span>
+                    </button>
+                </div>
+
+                <!-- Kisah Petualangan -->
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-xl mb-4 text-xs sm:text-sm text-amber-950">
+                    <p id="modal-story-text" class="font-semibold"></p>
+                </div>
+
+                <!-- Visualisasi Pengelompokan Benda -->
+                <div id="visual-aid-box" class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 mb-4 min-h-[84px] flex flex-wrap items-center justify-center gap-2">
+                </div>
+
+                <!-- Pertanyaan & Persamaan -->
+                <div class="text-center mb-4">
+                    <p id="question-text" class="font-bold text-base sm:text-lg text-slate-800 mb-2"></p>
+                    <div id="math-equation-badge" class="inline-block bg-sky-100 text-sky-900 font-display font-bold text-2xl sm:text-3xl px-5 py-2 rounded-2xl border-2 border-sky-300">
+                        5 × 4 = ?
+                    </div>
+                </div>
+
+                <!-- Pilihan Jawaban -->
+                <div id="options-grid" class="grid grid-cols-2 gap-3">
+                </div>
+
+                <!-- Kotak Umpan Balik -->
+                <div id="feedback-box" class="hidden mt-4 p-3.5 rounded-2xl text-center font-bold text-base"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL BANTUAN KAKAK PINTAR ==================== -->
+    <div id="helper-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 border-4 border-indigo-400 shadow-2xl relative">
+            <button onclick="closeHelperModal()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full font-bold">✕</button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-3xl">🧠</div>
+                <div>
+                    <h3 class="font-display font-bold text-xl text-indigo-950">Bantuan Kakak Pintar</h3>
+                    <p class="text-xs font-bold text-indigo-600">Trik Cepat & Mudah Kurikulum Merdeka</p>
+                </div>
+            </div>
+            <div id="helper-content" class="space-y-3 text-sm text-slate-700">
+            </div>
+            <button onclick="closeHelperModal()" class="mt-5 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-display font-bold py-3 rounded-2xl">
+                Aha, Aku Mengerti! 👍
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL FAKTA UNIK & BUDAYA NUSANTARA ==================== -->
+    <div id="fact-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 border-4 border-emerald-400 shadow-2xl text-center my-auto">
+            <div class="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 font-extrabold text-xs px-3 py-1 rounded-full mb-2">
+                <span>🎉</span>
+                <span>POS DITAKLUKKAN! +3 BINTANG ⭐</span>
+            </div>
+            <h3 id="fact-title" class="font-display font-bold text-2xl text-emerald-950 mb-2">Tahukah Kamu?</h3>
+            <p id="fact-body" class="text-sm sm:text-base text-slate-700 bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 mb-4 leading-relaxed"></p>
+
+            <!-- Sorotan Budaya Daerah -->
+            <div id="fact-culture-grid" class="grid grid-cols-2 gap-2 text-left mb-5">
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="readFactAloud()" class="bg-teal-100 hover:bg-teal-200 text-teal-900 font-bold px-4 py-3 rounded-2xl flex items-center justify-center gap-1">
+                    <span>🔊</span>
+                </button>
+                <button id="btn-next-island" onclick="closeFactAndSail()" class="btn-3d flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-display font-bold text-lg py-3 rounded-2xl shadow-[0_4px_0_#065f46]">
+                    Lanjut Berlayar! ⛵
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL SERTIFIKAT KELULUSAN ==================== -->
+    <div id="certificate-modal" class="fixed inset-0 z-50 hidden bg-slate-900/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="max-w-3xl w-full my-auto space-y-4">
+            <div id="certificate-area" class="bg-gradient-to-br from-amber-50 via-white to-orange-50 rounded-3xl p-6 sm:p-10 border-8 border-double border-amber-500 shadow-2xl text-center relative overflow-hidden">
+                <div class="text-4xl sm:text-5xl mb-2">🏆🇮🇩🏆</div>
+                <p class="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-amber-700 mb-1">Sertifikat Kelulusan Nusantara</p>
+                <h2 class="font-display font-bold text-2xl sm:text-4xl text-sky-950 mb-3">Penjelajah Angka Nusantara</h2>
+                <p class="text-xs sm:text-sm text-slate-600 mb-2">Dengan bangga diberikan kepada:</p>
+                <div id="cert-player-name" class="font-display font-bold text-2xl sm:text-4xl text-emerald-700 border-b-2 border-dashed border-amber-400 inline-block px-6 pb-1 mb-3">
+                    Nama Kapten
+                </div>
+                <p id="cert-grade-badge" class="text-xs sm:text-sm font-extrabold text-indigo-800 bg-indigo-100 inline-block px-4 py-1 rounded-full mb-3">
+                    Jenjang Kelas 3 SD • Kurikulum Merdeka
+                </p>
+                <p class="text-xs sm:text-sm text-slate-700 max-w-xl mx-auto leading-relaxed mb-6">
+                    Telah berhasil menaklukkan seluruh <b>7 Pos Permainan Tradisional Nusantara</b> dari <b>Sabang sampai Merauke</b> dengan perolehan <b id="cert-stars-count">21 Bintang Emas</b>!
+                </p>
+                <div class="flex items-center justify-between text-xs text-slate-500 border-t border-amber-200 pt-4 max-w-lg mx-auto">
+                    <div>
+                        <span class="block font-bold text-slate-700">Tanggal Lulus</span>
+                        <span id="cert-date">-</span>
+                    </div>
+                    <div class="text-2xl">⛵</div>
+                    <div>
+                        <span class="block font-bold text-slate-700">Predikat</span>
+                        <span class="text-emerald-700 font-extrabold">Kapten Jitu Nusantara</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="no-print flex flex-wrap justify-center gap-3">
+                <button onclick="window.print()" class="btn-3d bg-amber-500 hover:bg-amber-600 text-amber-950 font-display font-bold px-6 py-3 rounded-2xl shadow-[0_4px_0_#b45309] flex items-center gap-2">
+                    <span>🖨️</span>
+                    <span>Cetak / Simpan PDF</span>
+                </button>
+                <button onclick="closeCertificateModal()" class="bg-white hover:bg-slate-100 text-slate-800 font-bold px-6 py-3 rounded-2xl">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL KONFIRMASI RESET ==================== -->
+    <div id="reset-modal" class="fixed inset-0 z-50 hidden bg-slate-900/75 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center border-4 border-rose-400 shadow-2xl">
+            <div class="text-4xl mb-2">🔄</div>
+            <h3 class="font-display font-bold text-xl text-slate-800 mb-2">Ulangi Petualangan?</h3>
+            <p class="text-sm text-slate-600 mb-5">Semua bintang dan progres pulau akan kembali ke awal (Sumatra).</p>
+            <div class="flex gap-3">
+                <button onclick="closeResetModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-xl">Batal</button>
+                <button onclick="resetGame()" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 rounded-xl">Ya, Ulangi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL LOGIN ADMIN / GURU ==================== -->
+    <div id="admin-login-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 border-4 border-indigo-500 shadow-2xl relative">
+            <button onclick="closeAdminLoginModal()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full font-bold">✕</button>
+            <div class="text-center mb-5">
+                <div class="w-14 h-14 bg-indigo-100 text-indigo-700 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-2 shadow-inner">
+                    👩‍🏫
+                </div>
+                <h3 class="font-display font-bold text-2xl text-indigo-950">Login Admin / Guru</h3>
+                <p class="text-xs sm:text-sm text-slate-500 font-semibold mt-1">
+                    Masuk untuk memantau progres belajar dan riwayat aktivitas seluruh siswa
+                </p>
+            </div>
+
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username Admin</label>
+                    <input type="text" id="admin-username" value="admin" required
+                        class="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none font-bold text-slate-800 bg-slate-50"
+                        placeholder="Masukkan username">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kata Sandi / PIN</label>
+                    <input type="password" id="admin-password" required
+                        class="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none font-bold text-slate-800 bg-slate-50"
+                        placeholder="Masukkan PIN (default: 1234)">
+                </div>
+                <p id="admin-login-error" class="hidden text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 p-2.5 rounded-xl text-center">
+                    Username atau PIN salah! Gunakan username: <b>admin</b> dan PIN: <b>1234</b> (atau <b>guru123</b>).
+                </p>
+                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-2.5 text-center text-xs text-indigo-800 font-semibold">
+                    💡 Info Demo: Username <b>admin</b> • PIN <b>1234</b>
+                </div>
+                <button type="submit" class="btn-3d w-full bg-indigo-600 hover:bg-indigo-700 text-white font-display font-bold text-lg py-3 rounded-2xl shadow-[0_4px_0_#312e81]">
+                    Masuk ke Dashboard Pemantauan 🔐
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL DASHBOARD PEMANTAUAN ADMIN ==================== -->
+    <div id="admin-dashboard-modal" class="fixed inset-0 z-50 hidden bg-slate-900/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-5 overflow-y-auto">
+        <div class="bg-slate-50 rounded-3xl max-w-6xl w-full shadow-2xl border-4 border-indigo-500 overflow-hidden my-auto flex flex-col max-h-[92vh]">
+            <!-- Header Dashboard -->
+            <div class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-blue-700 p-4 sm:p-5 text-white flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 bg-white/20 rounded-2xl flex items-center justify-center text-2xl">📊</div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 class="font-display font-bold text-xl sm:text-2xl leading-tight">Dashboard Pemantauan Siswa</h2>
+                            <span id="cloud-sync-badge" class="bg-emerald-400 text-emerald-950 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">☁️ Cloud Live Sync</span>
+                        </div>
+                        <p class="text-xs text-indigo-100 font-semibold">Nusantara Math Adventure • Sinkronisasi Lintas Perangkat (Kelas 1 - 6 SD)</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportAdminCSV()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-display font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow flex items-center gap-1.5 transition">
+                        <span>📥</span>
+                        <span>Unduh CSV</span>
+                    </button>
+                    <button onclick="logoutAdmin()" class="bg-white/20 hover:bg-white/30 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition">
+                        Tutup ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- Konten Dashboard -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-5">
+                <!-- Navigasi Tab Dashboard Admin -->
+                <div class="flex flex-wrap gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+                    <button id="admin-tab-btn-monitor" onclick="switchAdminTab('monitor')" class="flex-1 py-2.5 px-4 rounded-xl font-display font-bold text-xs sm:text-sm bg-indigo-600 text-white shadow transition flex items-center justify-center gap-1.5">
+                        <span>📊</span>
+                        <span>Pemantauan Siswa</span>
+                    </button>
+                    <button id="admin-tab-btn-link" onclick="switchAdminTab('link')" class="flex-1 py-2.5 px-4 rounded-xl font-display font-bold text-xs sm:text-sm bg-slate-100 hover:bg-indigo-50 text-slate-700 transition flex items-center justify-center gap-1.5">
+                        <span>🔗</span>
+                        <span>Buat Link Khusus Siswa</span>
+                    </button>
+                    <button id="admin-tab-btn-questions" onclick="switchAdminTab('questions')" class="flex-1 py-2.5 px-4 rounded-xl font-display font-bold text-xs sm:text-sm bg-slate-100 hover:bg-indigo-50 text-slate-700 transition flex items-center justify-center gap-1.5">
+                        <span>📝</span>
+                        <span>Kelola Bank Soal</span>
+                    </button>
+                </div>
+
+                <!-- ==================== TAB 1: PEMANTAUAN SISWA ==================== -->
+                <div id="admin-tab-monitor" class="space-y-5">
+                    <!-- Kartu Statistik Ringkas -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                        <div class="bg-white p-4 rounded-2xl border-2 border-indigo-100 shadow-sm">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Total Siswa Terdaftar</p>
+                            <div class="flex items-end justify-between mt-1">
+                                <span id="stat-total-students" class="font-display font-bold text-2xl sm:text-3xl text-indigo-700">0</span>
+                                <span class="text-2xl">🧑‍🎓</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border-2 border-emerald-100 shadow-sm">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Siswa Lulus (7/7 Pulau)</p>
+                            <div class="flex items-end justify-between mt-1">
+                                <span id="stat-graduated-students" class="font-display font-bold text-2xl sm:text-3xl text-emerald-600">0</span>
+                                <span class="text-2xl">🏆</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border-2 border-amber-100 shadow-sm">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Rata-rata Bintang</p>
+                            <div class="flex items-end justify-between mt-1">
+                                <span id="stat-avg-stars" class="font-display font-bold text-2xl sm:text-3xl text-amber-600">0.0</span>
+                                <span class="text-2xl">⭐</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border-2 border-sky-100 shadow-sm">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Akurasi Jawaban Benar</p>
+                            <div class="flex items-end justify-between mt-1">
+                                <span id="stat-accuracy" class="font-display font-bold text-2xl sm:text-3xl text-sky-600">0%</span>
+                                <span class="text-2xl">🎯</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Kelas & Pencarian Siswa -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-xs font-bold text-slate-600">Filter Jenjang:</span>
+                            <select id="admin-grade-filter" onchange="renderAdminDashboard()" class="bg-slate-100 border border-slate-300 text-slate-800 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl focus:outline-none">
+                                <option value="all">Semua Kelas (1 - 6 SD)</option>
+                                <option value="1">Kelas 1 SD (Fase A)</option>
+                                <option value="2">Kelas 2 SD (Fase A)</option>
+                                <option value="3">Kelas 3 SD (Fase B)</option>
+                                <option value="4">Kelas 4 SD (Fase B)</option>
+                                <option value="5">Kelas 5 SD (Fase C)</option>
+                                <option value="6">Kelas 6 SD (Fase C)</option>
+                            </select>
+                            <input type="text" id="admin-search-input" oninput="renderAdminDashboard()" placeholder="Cari nama atau kode kelas..."
+                                class="bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-xs sm:text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <button onclick="clearActivityLogs()" class="text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl transition">
+                            🗑️ Bersihkan Log Aktivitas
+                        </button>
+                    </div>
+
+                    <!-- Info ID Sesi Cloud untuk Guru -->
+                    <div class="bg-indigo-50 border border-indigo-200 rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-indigo-900">
+                        <span class="font-bold">🌐 Status Koneksi Lintas Perangkat: <b id="cloud-connection-text" class="text-emerald-700">Menghubungkan ke Cloud...</b></span>
+                        <span class="font-mono text-[11px] bg-white px-2.5 py-1 rounded-lg border border-indigo-200">ID Perangkat: <b id="cloud-device-uid">-</b></span>
+                    </div>
+
+                    <!-- Tabel Progres Siswa -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="bg-slate-100 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                            <h3 class="font-display font-bold text-slate-800 text-base flex items-center gap-2">
+                                <span>📋</span> Rekapitulasi Progres Belajar Siswa
+                            </h3>
+                            <span id="admin-student-count-badge" class="text-xs font-bold text-indigo-700 bg-indigo-100 px-2.5 py-0.5 rounded-full">0 Siswa</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold text-slate-500 uppercase">
+                                        <th class="py-3 px-4">Nama Siswa</th>
+                                        <th class="py-3 px-4">Jenjang / Ruang</th>
+                                        <th class="py-3 px-4">Posisi Pulau</th>
+                                        <th class="py-3 px-4">Progres</th>
+                                        <th class="py-3 px-4">Bintang</th>
+                                        <th class="py-3 px-4">Statistik Jawaban</th>
+                                        <th class="py-3 px-4">Aktivitas Terakhir</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-students-tbody" class="divide-y divide-slate-100 text-sm">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Log Aktivitas Real-Time -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="bg-slate-100 px-4 py-3 border-b border-slate-200">
+                            <h3 class="font-display font-bold text-slate-800 text-base flex items-center gap-2">
+                                <span>🕒</span> Riwayat Aktivitas Siswa Terbaru
+                            </h3>
+                        </div>
+                        <div id="admin-logs-list" class="p-3 max-h-60 overflow-y-auto divide-y divide-slate-100">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== TAB 2: GENERATOR LINK KHUSUS SISWA ==================== -->
+                <div id="admin-tab-link" class="hidden space-y-5">
+                    <div class="bg-white p-5 sm:p-6 rounded-2xl border-2 border-indigo-100 shadow-sm space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-2xl">🔗</div>
+                            <div>
+                                <h3 class="font-display font-bold text-xl text-indigo-950">Buat Link Khusus Siswa</h3>
+                                <p class="text-xs sm:text-sm text-slate-600">Bagikan tautan ini ke WhatsApp / Google Classroom siswa agar mereka otomatis masuk ke jenjang kelas dan ruang belajar yang ditentukan.</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">1. Pilih Jenjang Kelas SD:</label>
+                                <select id="link-gen-grade" onchange="updateGeneratedStudentLink()" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-indigo-500 font-bold text-sm text-slate-800 bg-slate-50">
+                                    <option value="1">Kelas 1 SD (Fase A)</option>
+                                    <option value="2">Kelas 2 SD (Fase A)</option>
+                                    <option value="3" selected>Kelas 3 SD (Fase B)</option>
+                                    <option value="4">Kelas 4 SD (Fase B)</option>
+                                    <option value="5">Kelas 5 SD (Fase C)</option>
+                                    <option value="6">Kelas 6 SD (Fase C)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">2. Label Ruang / Rombel (Opsional):</label>
+                                <input type="text" id="link-gen-room" oninput="updateGeneratedStudentLink()" placeholder="Contoh: 3A-SDN01 / Kelompok-Merah"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-indigo-500 font-bold text-sm text-slate-800 bg-slate-50">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">3. Nama Siswa Spesifik (Opsional - kosongkan jika link untuk 1 kelas):</label>
+                                <input type="text" id="link-gen-student" oninput="updateGeneratedStudentLink()" placeholder="Contoh: Aisyah Putri (biarkan kosong agar siswa mengisi namanya sendiri)"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-indigo-500 font-bold text-sm text-slate-800 bg-slate-50">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-1">
+                            <input type="checkbox" id="link-gen-lock" checked onchange="updateGeneratedStudentLink()" class="w-4 h-4 accent-indigo-600 rounded">
+                            <label for="link-gen-lock" class="text-xs sm:text-sm font-bold text-slate-700">Kunci pilihan jenjang kelas agar siswa tidak salah memilih kelas lain</label>
+                        </div>
+
+                        <div class="bg-slate-100 p-4 rounded-2xl border-2 border-dashed border-indigo-300 space-y-2">
+                            <span class="text-xs font-extrabold text-indigo-800 uppercase block">Tautan Undangan Siswa Siap Bagikan:</span>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" id="generated-student-url" readonly
+                                    class="flex-1 bg-white px-3.5 py-2.5 rounded-xl border border-slate-300 font-mono text-xs text-slate-700 focus:outline-none">
+                                <button type="button" onclick="copyGeneratedStudentLink()" class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-display font-bold text-sm px-5 py-2.5 rounded-xl shadow-[0_3px_0_#312e81] flex items-center justify-center gap-1.5 shrink-0">
+                                    <span>📋</span>
+                                    <span>Salin Link</span>
+                                </button>
+                            </div>
+                            <p id="copy-link-feedback" class="hidden text-xs font-extrabold text-emerald-700">✅ Tautan khusus siswa berhasil disalin! Silakan tempel dan bagikan kepada siswa.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== TAB 3: KELOLA BANK SOAL (TAMBAH, EDIT, HAPUS) ==================== -->
+                <div id="admin-tab-questions" class="hidden space-y-5">
+                    <!-- Pemilih Kelas & Pulau untuk Manajemen Soal -->
+                    <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-indigo-100 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <div>
+                                <label class="block text-[11px] font-extrabold text-slate-500 uppercase mb-1">Pilih Jenjang Kelas:</label>
+                                <select id="qm-grade-select" onchange="renderAdminQuestionManager()" class="bg-indigo-50 border border-indigo-300 text-indigo-950 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl focus:outline-none">
+                                    <option value="1">Kelas 1 SD</option>
+                                    <option value="2">Kelas 2 SD</option>
+                                    <option value="3" selected>Kelas 3 SD</option>
+                                    <option value="4">Kelas 4 SD</option>
+                                    <option value="5">Kelas 5 SD</option>
+                                    <option value="6">Kelas 6 SD</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-extrabold text-slate-500 uppercase mb-1">Pilih Pos Pulau:</label>
+                                <select id="qm-pos-select" onchange="renderAdminQuestionManager()" class="bg-amber-50 border border-amber-300 text-amber-950 font-bold text-xs sm:text-sm px-3 py-2 rounded-xl focus:outline-none">
+                                    <option value="0">Pos 1 • Sumatra (Gasing)</option>
+                                    <option value="1">Pos 2 • Jawa (Congklak)</option>
+                                    <option value="2">Pos 3 • Kalimantan (Enggrang)</option>
+                                    <option value="3">Pos 4 • Sulawesi (Lompat Karet)</option>
+                                    <option value="4">Pos 5 • Bali & Nusra (Tari Topeng)</option>
+                                    <option value="5">Pos 6 • Maluku (Bentengan)</option>
+                                    <option value="6">Pos 7 • Papua (Panahan & Boss)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="openQuestionEditorModal(-1)" class="btn-3d bg-emerald-500 hover:bg-emerald-600 text-white font-display font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-[0_3px_0_#065f46] flex items-center gap-1.5">
+                                <span>➕</span>
+                                <span>Tambah Soal Baru</span>
+                            </button>
+                            <button type="button" onclick="resetCustomQuestionsForPos()" class="bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-300 font-bold text-xs px-3 py-2.5 rounded-xl transition">
+                                ↺ Reset Soal Bawaan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Soal Aktif pada Pos & Kelas Terpilih -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="bg-slate-100 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+                            <h3 id="qm-list-header" class="font-display font-bold text-slate-800 text-base">Daftar Soal Aktif</h3>
+                            <span id="qm-count-badge" class="text-xs font-bold text-indigo-700 bg-indigo-100 px-2.5 py-0.5 rounded-full">0 Soal</span>
+                        </div>
+                        <div id="qm-questions-list" class="p-4 space-y-3">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL FORM TAMBAH / EDIT SOAL ==================== -->
+    <div id="question-editor-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 border-4 border-emerald-500 shadow-2xl relative my-auto">
+            <button type="button" onclick="closeQuestionEditorModal()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full font-bold">✕</button>
+            <h3 id="qe-modal-title" class="font-display font-bold text-2xl text-emerald-950 mb-1">Tambah Soal Baru</h3>
+            <p id="qe-modal-subtitle" class="text-xs font-bold text-slate-500 mb-4">Perubahan soal akan langsung tersinkronisasi ke perangkat semua siswa.</p>
+
+            <form onsubmit="saveEditedQuestion(event)" class="space-y-3.5">
+                <input type="hidden" id="qe-edit-index" value="-1">
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Cerita / Pertanyaan Soal:</label>
+                    <textarea id="qe-text" rows="2" required placeholder="Contoh: Setiap gasing memiliki 4 tali. Jika ada 6 gasing, berapa total talinya?"
+                        class="w-full px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:outline-none text-sm font-semibold text-slate-800"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Simbol / Persamaan:</label>
+                        <input type="text" id="qe-eq" required placeholder="Contoh: 6 × 4 = ?"
+                            class="w-full px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:outline-none text-sm font-bold text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Jawaban Benar (Angka):</label>
+                        <input type="number" step="any" id="qe-ans" required placeholder="Contoh: 24"
+                            class="w-full px-3.5 py-2 rounded-xl border-2 border-emerald-200 bg-emerald-50/50 focus:border-emerald-500 focus:outline-none text-sm font-extrabold text-emerald-900">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">4 Pilihan Jawaban (Pisahkan dengan tanda koma):</label>
+                    <input type="text" id="qe-opts" required placeholder="Contoh: 20, 24, 28, 32"
+                        class="w-full px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-emerald-500 focus:outline-none text-sm font-bold text-slate-800">
+                    <p class="text-[11px] text-slate-500 mt-0.5">Pastikan jawaban benar termasuk di dalam 4 pilihan tersebut.</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2.5">
+                    <div>
+                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase mb-1">Jml Kelompok:</label>
+                        <input type="number" min="1" max="10" id="qe-groups" value="4" required
+                            class="w-full px-3 py-2 rounded-xl border-2 border-slate-200 text-sm font-bold text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase mb-1">Isi/Kelompok:</label>
+                        <input type="number" min="1" max="10" id="qe-pergroup" value="4" required
+                            class="w-full px-3 py-2 rounded-xl border-2 border-slate-200 text-sm font-bold text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-extrabold text-slate-700 uppercase mb-1">Ikon Emoji:</label>
+                        <input type="text" id="qe-emoji" value="🪀" required
+                            class="w-full px-3 py-2 rounded-xl border-2 border-slate-200 text-center text-base">
+                    </div>
+                </div>
+
+                <p id="qe-form-error" class="hidden text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 p-2 rounded-xl"></p>
+
+                <div class="flex gap-2.5 pt-2">
+                    <button type="button" onclick="closeQuestionEditorModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-xl">Batal</button>
+                    <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-display font-bold py-2.5 rounded-xl shadow">Simpan Soal 💾</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPT LOGIKA PERMAINAN & KURIKULUM ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, addDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Konfigurasi Cloud Lintas Perangkat
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nusantara-math-adventure';
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let cloudReady = false;
+
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+            }
+        } catch (err) {
+            console.warn("Konfigurasi cloud belum tersedia:", err);
+        }
+
+        // Data Dasar 7 Kepulauan & Ragam Budaya Nusantara
+        const BASE_ISLANDS = [
+            {
+                id: 0,
+                island: "Sumatra",
+                gameName: "Permainan Gasing",
+                icon: "🪀",
+                mapX: 165, mapY: 180,
+                shipX: 165, shipY: 145,
+                color: "from-amber-500 to-orange-600",
+                story: "Kapal berlabuh di Sumatra! Untuk menghidupkan baling-baling kapal penjelajah, adik harus memutar gasing kayu tradisional.",
+                factTitle: "Fakta Unik Sumatra",
+                factBody: "Tahukah kamu? Rumah Gadang di Sumatra Barat memiliki atap melengkung runcing yang bentuknya mirip tanduk kerbau dan tahan gempa!",
+                cultures: [
+                    { label: "Rumah Adat", value: "Rumah Gadang", icon: "🏠" },
+                    { label: "Tarian Khas", value: "Tari Saman & Piring", icon: "💃" },
+                    { label: "Alat Musik", value: "Saluang & Gordang", icon: "🎶" },
+                    { label: "Kuliner", value: "Rendang & Pempek", icon: "🍛" }
+                ]
+            },
+            {
+                id: 1,
+                island: "Jawa",
+                gameName: "Permainan Congklak",
+                icon: "🐚",
+                mapX: 345, mapY: 302,
+                shipX: 345, shipY: 268,
+                color: "from-emerald-500 to-green-600",
+                story: "Mendarat di tanah Jawa, adik diajak bermain dakon atau congklak bersama anak-anak desa dengan biji kerang!",
+                factTitle: "Fakta Unik Pulau Jawa",
+                factBody: "Tahukah kamu? Candi Borobudur di Jawa Tengah adalah candi Buddha terbesar di dunia yang tersusun dari sekitar 2 juta balok batu!",
+                cultures: [
+                    { label: "Rumah Adat", value: "Rumah Joglo", icon: "🏛️" },
+                    { label: "Seni Budaya", value: "Wayang Kulit & Batik", icon: "🎭" },
+                    { label: "Alat Musik", value: "Angklung & Gamelan", icon: "🎼" },
+                    { label: "Kuliner", value: "Gudeg & Rawon", icon: "🍲" }
+                ]
+            },
+            {
+                id: 2,
+                island: "Kalimantan",
+                gameName: "Permainan Enggrang",
+                icon: "🎋",
+                mapX: 425, mapY: 170,
+                shipX: 425, shipY: 135,
+                color: "from-teal-500 to-cyan-600",
+                story: "Menjelajah perkampungan tepi sungai di Kalimantan, adik harus menyeberang titian menggunakan enggrang bambu!",
+                factTitle: "Fakta Unik Kalimantan",
+                factBody: "Tahukah kamu? Kalimantan dijuluki 'Paru-Paru Dunia' karena hutan hujan tropisnya yang luas dan menjadi rumah bagi Orangutan!",
+                cultures: [
+                    { label: "Rumah Adat", value: "Rumah Betang / Lamin", icon: "🏡" },
+                    { label: "Tarian Khas", value: "Tari Hudoq & Gong", icon: "🪶" },
+                    { label: "Alat Musik", value: "Sape (Petik Dayak)", icon: "🎸" },
+                    { label: "Ikon Unik", value: "Pasar Terapung Lok Baintan", icon: "🛶" }
+                ]
+            },
+            {
+                id: 3,
+                island: "Sulawesi",
+                gameName: "Lompat Karet (Yeye)",
+                icon: "🤸",
+                mapX: 568, mapY: 192,
+                shipX: 568, shipY: 158,
+                color: "from-sky-500 to-blue-600",
+                story: "Singgah di Sulawesi, adik diajak bermain lompat tali karet merdeka setinggi pinggang bersama sahabat baru!",
+                factTitle: "Fakta Unik Sulawesi",
+                factBody: "Tahukah kamu? Suku Bugis-Makassar di Sulawesi terkenal sebagai pelaut ulung dengan kapal kayu legendaris bernama Kapal Pinisi!",
+                cultures: [
+                    { label: "Rumah Adat", value: "Tongkonan Toraja", icon: "⛺" },
+                    { label: "Tarian Khas", value: "Tari Kipas Pakarena", icon: "🪭" },
+                    { label: "Alat Musik", value: "Kolintang Minahasa", icon: "🎹" },
+                    { label: "Kuliner", value: "Coto Makassar & Sup Konro", icon: "🍜" }
+                ]
+            },
+            {
+                id: 4,
+                island: "Bali & Nusra",
+                gameName: "Tari Topeng Nusantara",
+                icon: "👺",
+                mapX: 545, mapY: 318,
+                shipX: 545, shipY: 282,
+                color: "from-rose-500 to-pink-600",
+                story: "Menyeberang ke Bali dan Nusa Tenggara, adik ikut menyiapkan ornamen bunga dan selendang penari topeng tradisional!",
+                factTitle: "Fakta Unik Bali & Nusa Tenggara",
+                factBody: "Tahukah kamu? Di Pulau Komodo, Nusa Tenggara Timur, hidup kadal purba raksasa bernama Komodo yang hanya ada di Indonesia!",
+                cultures: [
+                    { label: "Arsitektur", value: "Candi Bentar & Mbaru Niang", icon: "⛩️" },
+                    { label: "Tarian Khas", value: "Tari Kecak & Pendet", icon: "🔥" },
+                    { label: "Alat Musik", value: "Sasando (Rote)", icon: "🪕" },
+                    { label: "Kriya Khas", value: "Kain Tenun Ikat", icon: "🧣" }
+                ]
+            },
+            {
+                id: 5,
+                island: "Maluku",
+                gameName: "Permainan Bentengan",
+                icon: "🏰",
+                mapX: 705, mapY: 195,
+                shipX: 705, shipY: 160,
+                color: "from-purple-500 to-indigo-600",
+                story: "Di Kepulauan Rempah Maluku, adik menjaga benteng pertahanan tim dari kepungan lawan dengan perhitungan cermat!",
+                factTitle: "Fakta Unik Kepulauan Maluku",
+                factBody: "Tahukah kamu? Maluku dijuluki 'Kepulauan Rempah' karena sejak ratusan tahun lalu menjadi penghasil cengkeh dan pala terbaik di dunia!",
+                cultures: [
+                    { label: "Rumah Adat", value: "Rumah Baileo", icon: "🏯" },
+                    { label: "Tarian Khas", value: "Tari Cakalele", icon: "🛡️" },
+                    { label: "Alat Musik", value: "Tifa & Totobuang", icon: "🥁" },
+                    { label: "Kuliner", value: "Papeda & Ikan Kuah Kuning", icon: "🥣" }
+                ]
+            },
+            {
+                id: 6,
+                island: "Papua (Boss)",
+                gameName: "Panahan Kaseang & Final",
+                icon: "🏹",
+                mapX: 865, mapY: 238,
+                shipX: 865, shipY: 202,
+                color: "from-amber-600 to-red-600",
+                story: "Pemberhentian terakhir di ujung timur Papua! Bidik sasaran emas panahan tradisional Kaseang dan taklukkan tantangan Final Boss!",
+                factTitle: "Fakta Unik Tanah Papua",
+                factBody: "Tahukah kamu? Di Papua terdapat Puncak Jaya Wijaya, satu-satunya gunung di Indonesia yang puncaknya diselimuti salju abadi, serta burung Cenderawasih!",
+                cultures: [
+                    { label: "Rumah Adat", value: "Rumah Honai", icon: "🛖" },
+                    { label: "Tarian Khas", value: "Tari Yospan & Perang", icon: "🪶" },
+                    { label: "Alat Musik", value: "Tifa Papua", icon: "🪘" },
+                    { label: "Kriya Khas", value: "Tas Noken (Warisan UNESCO)", icon: "👜" }
+                ]
+            }
+        ];
+
+        // Kurikulum Merdeka Kelas 1 - 6 SD
+        const CURRICULUM_DATA = {
+            1: {
+                gradeName: "Kelas 1 SD",
+                fase: "Fase A",
+                summary: "Bilangan Cacah 1-20, Penjumlahan, Pengurangan, Bangun Datar & Pola Bilangan",
+                topics: [
+                    { badge: "Bilangan 1-20", questions: [
+                        { eq: "12 + 4 = ?", text: "Ada 12 gasing berputar, lalu ditambah 4 gasing lagi. Berapa total gasing?", ans: 16, opts: [14, 15, 16, 18], groups: 12, perGroup: 1, emoji: "🪀" },
+                        { eq: "9 + 6 = ?", text: "Kapten menemukan 9 gasing merah dan 6 gasing biru. Berapa semuanya?", ans: 15, opts: [13, 14, 15, 16], groups: 9, perGroup: 1, emoji: "🪀" },
+                        { eq: "18 - 5 = ?", text: "Dari 18 gasing kayu, 5 gasing berhenti berputar. Sisa berapa yang berputar?", ans: 13, opts: [12, 13, 14, 15], groups: 13, perGroup: 1, emoji: "🪀" }
+                    ]},
+                    { badge: "Penjumlahan ≤ 20", questions: [
+                        { eq: "8 + 7 = ?", text: "Lubang congklak kiri berisi 8 kerang, kanan berisi 7 kerang. Berapa jumlahnya?", ans: 15, opts: [14, 15, 16, 17], groups: 8, perGroup: 1, emoji: "🐚" },
+                        { eq: "11 + 8 = ?", text: "Adik mengumpulkan 11 biji sawo dan mendapat 8 biji lagi. Totalnya adalah...", ans: 19, opts: [17, 18, 19, 20], groups: 11, perGroup: 1, emoji: "🐚" },
+                        { eq: "6 + 9 = ?", text: "Hitunglah hasil penjumlahan 6 + 9 berikut ini!", ans: 15, opts: [14, 15, 16, 17], groups: 6, perGroup: 1, emoji: "🐚" }
+                    ]},
+                    { badge: "Pengurangan ≤ 20", questions: [
+                        { eq: "17 - 6 = ?", text: "Ada 17 batang bambu enggrang, dipakai 6 batang. Sisa berapa batang?", ans: 11, opts: [10, 11, 12, 13], groups: 11, perGroup: 1, emoji: "🎋" },
+                        { eq: "20 - 8 = ?", text: "Dari 20 ikatan rotan, 8 ikatan sudah dipasang. Sisa berapa ikatan?", ans: 12, opts: [11, 12, 13, 14], groups: 12, perGroup: 1, emoji: "🎋" },
+                        { eq: "15 - 9 = ?", text: "Berapakah hasil dari 15 dikurangi 9?", ans: 6, opts: [5, 6, 7, 8], groups: 6, perGroup: 1, emoji: "🎋" }
+                    ]},
+                    { badge: "Bangun Datar", questions: [
+                        { eq: "Sisi Segitiga = ?", text: "Berapa banyak sisi yang dimiliki bangun datar Segitiga?", ans: 3, opts: [2, 3, 4, 5], groups: 3, perGroup: 1, emoji: "🔺" },
+                        { eq: "Sudut Persegi = ?", text: "Berapa banyak titik sudut pada bingkai foto berbentuk Persegi?", ans: 4, opts: [3, 4, 5, 6], groups: 4, perGroup: 1, emoji: "🟦" },
+                        { eq: "Sisi Lingkaran = ?", text: "Roda pedati berbentuk lingkaran memiliki berapa sisi lengkung?", ans: 1, opts: [0, 1, 2, 4], groups: 1, perGroup: 1, emoji: "🟡" }
+                    ]},
+                    { badge: "Pola Bilangan", questions: [
+                        { eq: "2, 4, 6, ?", text: "Lanjutkan pola lompat 2 berikut: 2, 4, 6, ...", ans: 8, opts: [7, 8, 9, 10], groups: 4, perGroup: 2, emoji: "👺" },
+                        { eq: "5, 10, 15, ?", text: "Lanjutkan pola lompat 5 berikut: 5, 10, 15, ...", ans: 20, opts: [16, 18, 20, 25], groups: 4, perGroup: 5, emoji: "🌺" },
+                        { eq: "10, 8, 6, ?", text: "Lanjutkan pola hitung mundur: 10, 8, 6, ...", ans: 4, opts: [2, 3, 4, 5], groups: 4, perGroup: 1, emoji: "👺" }
+                    ]},
+                    { badge: "Pengukuran", questions: [
+                        { eq: "1 Minggu = ? Hari", text: "Ada berapa hari dalam 1 minggu?", ans: 7, opts: [5, 6, 7, 8], groups: 7, perGroup: 1, emoji: "📅" },
+                        { eq: "5 + 5 + 4 = ?", text: "Panjang tongkat A 5 jengkal, tongkat B 5 jengkal, tongkat C 4 jengkal. Totalnya?", ans: 14, opts: [12, 13, 14, 15], groups: 14, perGroup: 1, emoji: "📏" },
+                        { eq: "12 Bulan = ? Tahun", text: "Bulan Januari sampai Desember berjumlah 12 bulan, sama dengan berapa tahun?", ans: 1, opts: [1, 2, 10, 12], groups: 1, perGroup: 1, emoji: "🗓️" }
+                    ]},
+                    { badge: "Campuran Kelas 1", questions: [
+                        { eq: "14 + 5 = ?", text: "Panah emas mengenai angka 14 lalu ditambah 5 poin. Berapa skornya?", ans: 19, opts: [18, 19, 20, 21], groups: 10, perGroup: 1, emoji: "🎯" },
+                        { eq: "19 - 7 = ?", text: "Skor lawan 19 dikurangi 7 poin. Berapa sisanya?", ans: 12, opts: [11, 12, 13, 14], groups: 12, perGroup: 1, emoji: "🏹" },
+                        { eq: "10 + 10 = ?", text: "Tantangan Boss Kelas 1: Berapa hasil dari 10 + 10?", ans: 20, opts: [10, 15, 20, 25], groups: 2, perGroup: 10, emoji: "🏆" }
+                    ]}
+                ]
+            },
+            2: {
+                gradeName: "Kelas 2 SD",
+                fase: "Fase A",
+                summary: "Bilangan s.d. 100, Hitung Cepat, Perkalian Dasar (×2, ×3, ×5), Pembagian & Uang",
+                topics: [
+                    { badge: "Nilai Tempat s.d 100", questions: [
+                        { eq: "40 + 7 = ?", text: "4 puluhan ditambah 7 satuan sama dengan...", ans: 47, opts: [40, 47, 74, 57], groups: 4, perGroup: 10, emoji: "🪀" },
+                        { eq: "65 - 20 = ?", text: "65 gasing dikurangi 2 puluhan (20) adalah...", ans: 45, opts: [35, 45, 55, 63], groups: 4, perGroup: 10, emoji: "🪀" },
+                        { eq: "50 + 38 = ?", text: "Berapakah hasil penjumlahan 50 + 38?", ans: 88, opts: [78, 80, 88, 98], groups: 8, perGroup: 10, emoji: "🪀" }
+                    ]},
+                    { badge: "Perkalian ×2 & ×3", questions: [
+                        { eq: "6 × 2 = ?", text: "Ada 6 lubang congklak, masing-masing berisi 2 kerang. Berapa total kerang?", ans: 12, opts: [10, 12, 14, 16], groups: 6, perGroup: 2, emoji: "🐚" },
+                        { eq: "5 × 3 = ?", text: "5 piring masing-masing berisi 3 kue klepon. Berapa total kue?", ans: 15, opts: [12, 15, 18, 20], groups: 5, perGroup: 3, emoji: "🍡" },
+                        { eq: "8 × 3 = ?", text: "Hitunglah hasil perkalian 8 × 3!", ans: 24, opts: [21, 24, 27, 30], groups: 8, perGroup: 3, emoji: "🐚" }
+                    ]},
+                    { badge: "Perkalian ×5", questions: [
+                        { eq: "6 × 5 = ?", text: "6 pasang enggrang masing-masing diikat 5 tali rotan. Berapa total tali?", ans: 30, opts: [25, 30, 35, 40], groups: 6, perGroup: 5, emoji: "🎋" },
+                        { eq: "9 × 5 = ?", text: "9 ikat bambu masing-masing berisi 5 batang. Berapa semua bambunya?", ans: 45, opts: [40, 45, 50, 55], groups: 9, perGroup: 5, emoji: "🎋" },
+                        { eq: "7 × 5 = ?", text: "Berapakah hasil dari 7 × 5?", ans: 35, opts: [30, 35, 40, 45], groups: 7, perGroup: 5, emoji: "🎋" }
+                    ]},
+                    { badge: "Pembagian Dasar", questions: [
+                        { eq: "18 ÷ 3 = ?", text: "18 tali karet dibagikan rata kepada 3 anak. Tiap anak mendapat berapa?", ans: 6, opts: [5, 6, 7, 9], groups: 3, perGroup: 6, emoji: "🤸" },
+                        { eq: "25 ÷ 5 = ?", text: "25 biji karet dibagi ke dalam 5 kantong sama banyak. Tiap kantong berisi...", ans: 5, opts: [4, 5, 6, 10], groups: 5, perGroup: 5, emoji: "🤸" },
+                        { eq: "24 ÷ 4 = ?", text: "Berapakah hasil pembagian 24 ÷ 4?", ans: 6, opts: [4, 5, 6, 8], groups: 4, perGroup: 6, emoji: "🤸" }
+                    ]},
+                    { badge: "Uang & Waktu", questions: [
+                        { eq: "3 × 1.000 = ?", text: "Adik punya 3 koin Rp1.000. Berapa ribu rupiah uang adik?", ans: 3000, opts: [2000, 3000, 4000, 5000], groups: 3, perGroup: 1, emoji: "🪙" },
+                        { eq: "1 Jam = ? Menit", text: "Pertunjukan Tari Kecak berlangsung 1 jam. Berapa menit lamanya?", ans: 60, opts: [30, 45, 60, 100], groups: 6, perGroup: 10, emoji: "⏰" },
+                        { eq: "5.000 + 2.000 = ?", text: "Harga topeng Rp5.000 dan selendang Rp2.000. Berapa total harganya?", ans: 7000, opts: [6000, 7000, 8000, 9000], groups: 7, perGroup: 1, emoji: "💵" }
+                    ]},
+                    { badge: "Satuan Panjang & Berat", questions: [
+                        { eq: "2 m = ? cm", text: "Panjang bambu benteng 2 meter. Berapa sentimeter (cm) panjangnya?", ans: 200, opts: [20, 100, 200, 2000], groups: 2, perGroup: 10, emoji: "📏" },
+                        { eq: "3 kg = ? ons", text: "1 kg = 10 ons. Jika Kapten membawa 3 kg pala, berapa ons beratnya?", ans: 30, opts: [3, 13, 30, 300], groups: 3, perGroup: 10, emoji: "⚖️" },
+                        { eq: "45 + 35 = ?", text: "Berat karung cengkeh 45 kg dan pala 35 kg. Berapa kg totalnya?", ans: 80, opts: [70, 75, 80, 90], groups: 8, perGroup: 10, emoji: "📦" }
+                    ]},
+                    { badge: "Campuran Kelas 2", questions: [
+                        { eq: "8 × 5 = ?", text: "8 anak panah masing-masing bernilai 5 poin. Berapa skornya?", ans: 40, opts: [35, 40, 45, 50], groups: 8, perGroup: 5, emoji: "🎯" },
+                        { eq: "36 ÷ 6 = ?", text: "36 poin dibagi rata untuk 6 pemanah. Tiap pemanah mendapat...", ans: 6, opts: [5, 6, 7, 8], groups: 6, perGroup: 6, emoji: "🏹" },
+                        { eq: "100 - 35 = ?", text: "Tantangan Boss Kelas 2: Berapa hasil dari 100 - 35?", ans: 65, opts: [55, 65, 75, 85], groups: 6, perGroup: 10, emoji: "🏆" }
+                    ]}
+                ]
+            },
+            3: {
+                gradeName: "Kelas 3 SD",
+                fase: "Fase B",
+                summary: "Misi Utama Perkalian 4 sampai 10 & Tantangan Campuran Nusantara",
+                topics: [
+                    { badge: "Misi Perkalian 4", questions: [
+                        { a: 5, b: 4, text: "Setiap gasing memiliki 4 tali utama. Jika ada 5 gasing, berapa total talinya?", ans: 20, opts: [16, 20, 24, 28], groups: 5, perGroup: 4, emoji: "🪀" },
+                        { a: 7, b: 4, text: "Ada 7 gasing kayu yang berputar kencang, masing-masing memakai 4 tali. Berapa total talinya?", ans: 28, opts: [24, 28, 32, 36], groups: 7, perGroup: 4, emoji: "🪀" },
+                        { a: 9, b: 4, text: "Untuk kecepatan penuh kapal, 9 gasing diputar bersamaan (masing-masing 4 tali). Berapa semua talinya?", ans: 36, opts: [32, 36, 40, 44], groups: 9, perGroup: 4, emoji: "🪀" }
+                    ]},
+                    { badge: "Misi Perkalian 5", questions: [
+                        { a: 7, b: 5, text: "Satu lubang kecil congklak berisi 5 biji kerang. Jika ada 7 lubang yang terisi, berapa total bijinya?", ans: 35, opts: [30, 35, 40, 45], groups: 7, perGroup: 5, emoji: "🐚" },
+                        { a: 6, b: 5, text: "Giliran berikutnya, 6 lubang congklak masing-masing terisi 5 biji sawo. Berapa total bijinya?", ans: 30, opts: [25, 30, 35, 40], groups: 6, perGroup: 5, emoji: "🐚" },
+                        { a: 9, b: 5, text: "Wah hebat! 9 lubang congklak terisi penuh masing-masing 5 biji kerang. Berapa total semuanya?", ans: 45, opts: [40, 45, 50, 55], groups: 9, perGroup: 5, emoji: "🐚" }
+                    ]},
+                    { badge: "Misi Perkalian 6", questions: [
+                        { a: 6, b: 6, text: "Setiap pasang enggrang bambu membutuhkan 6 ikatan rotan pengaman. Jika ada 6 pasang enggrang, berapa total ikatannya?", ans: 36, opts: [30, 36, 42, 48], groups: 6, perGroup: 6, emoji: "🎋" },
+                        { a: 8, b: 6, text: "Tim penjelajah menyiapkan 8 pasang enggrang bambu, masing-masing 6 ikatan rotan. Berapa total ikatan rotan?", ans: 48, opts: [42, 46, 48, 54], groups: 8, perGroup: 6, emoji: "🎋" },
+                        { a: 7, b: 6, text: "Ada 7 pasang enggrang cadangan dengan 6 ikatan rotan di tiap pasangnya. Berapa total ikatannya?", ans: 42, opts: [36, 40, 42, 48], groups: 7, perGroup: 6, emoji: "🎋" }
+                    ]},
+                    { badge: "Misi Perkalian 7", questions: [
+                        { a: 8, b: 7, text: "Setiap lompatan sukses melewati 7 jalinan karet. Jika adik melompat 8 kali, berapa poinnya?", ans: 56, opts: [49, 54, 56, 63], groups: 8, perGroup: 7, emoji: "🤸" },
+                        { a: 6, b: 7, text: "Tali karet dinaikkan setinggi bahu! 6 lompatan sukses × 7 jalinan karet = berapa poin?", ans: 42, opts: [35, 42, 48, 49], groups: 6, perGroup: 7, emoji: "🤸" },
+                        { a: 9, b: 7, text: "Lompatan merdeka tertinggi! 9 lompatan × 7 jalinan karet = berapa poin?", ans: 63, opts: [56, 63, 70, 72], groups: 9, perGroup: 7, emoji: "🤸" }
+                    ]},
+                    { badge: "Misi Perkalian 8", questions: [
+                        { a: 4, b: 8, text: "Satu penari topeng membutuhkan 8 ornamen selendang dan bunga. Jika ada 4 penari, berapa total ornamennya?", ans: 32, opts: [24, 28, 32, 36], groups: 4, perGroup: 8, emoji: "👺" },
+                        { a: 7, b: 8, text: "Pertunjukan besar dimulai! 7 penari topeng masing-masing memakai 8 ornamen. Berapa total ornamennya?", ans: 56, opts: [48, 54, 56, 64], groups: 7, perGroup: 8, emoji: "🌺" },
+                        { a: 8, b: 8, text: "8 kelompok penari masing-masing menampilkan 8 gerakan topeng. Berapa total gerakannya?", ans: 64, opts: [56, 62, 64, 72], groups: 8, perGroup: 8, emoji: "👺" }
+                    ]},
+                    { badge: "Misi Perkalian 9", questions: [
+                        { a: 9, b: 9, text: "Setiap baris penjaga benteng terdiri dari 9 langkah strategi. Jika ada 9 baris, berapa total langkahnya?", ans: 81, opts: [72, 79, 81, 90], groups: 9, perGroup: 9, emoji: "🏰" },
+                        { a: 6, b: 9, text: "6 regu penjaga benteng masing-masing membawa 9 perisai kayu. Berapa total perisainya?", ans: 54, opts: [45, 54, 56, 63], groups: 6, perGroup: 9, emoji: "🛡️" },
+                        { a: 8, b: 9, text: "Serangan terakhir berhasil ditahan oleh 8 regu × 9 penjaga benteng. Berapa total penjaganya?", ans: 72, opts: [63, 72, 78, 81], groups: 8, perGroup: 9, emoji: "🏰" }
+                    ]},
+                    { badge: "Perkalian 10 & Boss", questions: [
+                        { a: 9, b: 10, text: "Setiap papan sasaran emas bernilai 10 poin. Jika adik mengenai sasaran 9 kali, berapakah skor totalnya?", ans: 90, opts: [80, 85, 90, 100], groups: 9, perGroup: 10, emoji: "🎯" },
+                        { a: 7, b: 8, text: "Tantangan Final Boss 1! Penjaga Raja Papua menguji perkalian 7 × 8. Berapakah hasilnya?", ans: 56, opts: [48, 54, 56, 64], groups: 7, perGroup: 8, emoji: "👑" },
+                        { a: 9, b: 7, text: "Tantangan Final Boss Terakhir! Taklukkan perkalian 9 × 7 untuk menamatkan peta Nusantara!", ans: 63, opts: [54, 63, 72, 81], groups: 9, perGroup: 7, emoji: "🏆" }
+                    ]}
+                ]
+            },
+            4: {
+                gradeName: "Kelas 4 SD",
+                fase: "Fase B",
+                summary: "Bilangan Cacah Besar, KPK & FPB, Pecahan Senilai, Luas Bangun Datar & Sudut",
+                topics: [
+                    { badge: "Bilangan s.d 10.000", questions: [
+                        { eq: "2.450 + 1.350 = ?", text: "Jumlah pengunjung festival gasing hari pertama 2.450 orang dan hari kedua 1.350 orang. Totalnya?", ans: 3800, opts: [3700, 3800, 3900, 4800], groups: 4, perGroup: 10, emoji: "🪀" },
+                        { eq: "5.000 - 1.750 = ?", text: "Dari 5.000 tiket kapal, 1.750 tiket sudah terjual. Berapa sisa tiketnya?", ans: 3250, opts: [3250, 3350, 3750, 4250], groups: 5, perGroup: 10, emoji: "🎫" },
+                        { eq: "25 × 12 = ?", text: "Ada 25 kotak berisi masing-masing 12 gasing. Berapa total gasing semuanya?", ans: 300, opts: [250, 275, 300, 325], groups: 12, perGroup: 5, emoji: "🪀" }
+                    ]},
+                    { badge: "KPK & FPB Dasar", questions: [
+                        { eq: "KPK(4, 6) = ?", text: "Lampu merah berkedip tiap 4 detik, lampu hijau tiap 6 detik. Tiap berapa detik keduanya berkedip bersama?", ans: 12, opts: [10, 12, 18, 24], groups: 3, perGroup: 4, emoji: "🐚" },
+                        { eq: "FPB(12, 18) = ?", text: "12 kerang putih dan 18 kerang coklat akan dibagi ke kantong sama banyak. Maksimal berapa kantong?", ans: 6, opts: [3, 4, 6, 12], groups: 6, perGroup: 3, emoji: "🐚" },
+                        { eq: "KPK(5, 8) = ?", text: "Berapakah Kelipatan Persekutuan Terkecil (KPK) dari 5 dan 8?", ans: 40, opts: [13, 20, 40, 80], groups: 5, perGroup: 8, emoji: "🐚" }
+                    ]},
+                    { badge: "Pecahan & Desimal", questions: [
+                        { eq: "3/4 dari 20 = ?", text: "3/4 bagian dari 20 batang bambu enggrang akan dicat merah. Berapa batang yang dicat?", ans: 15, opts: [10, 12, 15, 16], groups: 3, perGroup: 5, emoji: "🎋" },
+                        { eq: "0,5 + 0,25 = ?", text: "Panjang tali pertama 0,5 m dan tali kedua 0,25 m. Berapa meter total panjangnya?", ans: 0.75, opts: [0.3, 0.55, 0.75, 1.25], groups: 3, perGroup: 1, emoji: "🎋" },
+                        { eq: "2/5 = ? %", text: "Ubahlah pecahan 2/5 menjadi bentuk persen (%)!", ans: 40, opts: [20, 25, 40, 50], groups: 4, perGroup: 10, emoji: "🎋" }
+                    ]},
+                    { badge: "Luas Bangun Datar", questions: [
+                        { eq: "L = 12 × 8 = ?", text: "Lapangan lompat karet berbentuk persegi panjang berukuran 12 m × 8 m. Berapa m² luasnya?", ans: 96, opts: [40, 84, 96, 108], groups: 8, perGroup: 12, emoji: "🤸" },
+                        { eq: "L Persegi (s=15) = ?", text: "Sebuah ubin persegi memiliki panjang sisi 15 cm. Berapa cm² luas ubin tersebut?", ans: 225, opts: [60, 150, 225, 250], groups: 5, perGroup: 5, emoji: "🟦" },
+                        { eq: "Keliling (p=14, l=6)", text: "Hitung keliling persegi panjang dengan panjang 14 cm dan lebar 6 cm!", ans: 40, opts: [20, 34, 40, 84], groups: 4, perGroup: 10, emoji: "📏" }
+                    ]},
+                    { badge: "Besar Sudut (°)", questions: [
+                        { eq: "Sudut Siku-siku = ?°", text: "Gerakan tangan penari membentuk sudut siku-siku tegak lurus. Berapa derajat besarnya?", ans: 90, opts: [45, 60, 90, 180], groups: 9, perGroup: 10, emoji: "📐" },
+                        { eq: "Sudut Lurus = ?°", text: "Selendang direntangkan membentuk garis lurus sempurna. Berapa derajat besar sudut lurus?", ans: 180, opts: [90, 120, 180, 360], groups: 9, perGroup: 10, emoji: "👺" },
+                        { eq: "180° - 115° = ?°", text: "Dua sudut saling berpelurus (jumlah 180°). Jika satu sudut 115°, berapa sudut lainnya?", ans: 65, opts: [55, 65, 75, 85], groups: 6, perGroup: 10, emoji: "📐" }
+                    ]},
+                    { badge: "Piktogram & Data", questions: [
+                        { eq: "5 × 15 = ?", text: "Pada piktogram, 1 gambar benteng mewakili 15 siswa. Jika ada 5 gambar, berapa siswanya?", ans: 75, opts: [60, 65, 75, 80], groups: 5, perGroup: 15, emoji: "🏰" },
+                        { eq: "120 ÷ 8 = ?", text: "120 peserta lomba dibagi merata ke dalam 8 kelompok bentengan. Tiap kelompok berisi...", ans: 15, opts: [12, 14, 15, 16], groups: 8, perGroup: 15, emoji: "🛡️" },
+                        { eq: "24 + 32 + 19 = ?", text: "Data skor 3 regu: Regu A 24, Regu B 32, Regu C 19. Berapa jumlah seluruh skor?", ans: 75, opts: [65, 70, 75, 85], groups: 7, perGroup: 10, emoji: "📊" }
+                    ]},
+                    { badge: "Boss Kelas 4 SD", questions: [
+                        { eq: "144 ÷ 12 = ?", text: "144 anak panah dibagi ke dalam 12 tabung panah sama banyak. Tiap tabung berisi...", ans: 12, opts: [10, 11, 12, 14], groups: 12, perGroup: 12, emoji: "🏹" },
+                        { eq: "16 × 15 = ?", text: "Tantangan Boss 1: Hitunglah hasil perkalian 16 × 15!", ans: 240, opts: [210, 225, 240, 260], groups: 10, perGroup: 10, emoji: "👑" },
+                        { eq: "3/5 dari 100 = ?", text: "Tantangan Boss Terakhir: Berapa nilai dari 3/5 × 100?", ans: 60, opts: [30, 45, 60, 75], groups: 6, perGroup: 10, emoji: "🏆" }
+                    ]}
+                ]
+            },
+            5: {
+                gradeName: "Kelas 5 SD",
+                fase: "Fase C",
+                summary: "Operasi Pecahan & Persen, Luas Segitiga, Volume Kubus/Balok, Kecepatan & Skala",
+                topics: [
+                    { badge: "Pecahan & Persen", questions: [
+                        { eq: "25% dari 80 = ?", text: "25% dari 80 gasing di Sumatra terbuat dari kayu jati. Berapa jumlah gasing kayu jati?", ans: 20, opts: [15, 20, 25, 40], groups: 4, perGroup: 5, emoji: "🪀" },
+                        { eq: "3/4 + 1/2 = ?", text: "Panjang tali pertama 3/4 m dan tali kedua 1/2 m. Berapa meter totalnya (dalam desimal)?", ans: 1.25, opts: [0.75, 1.0, 1.25, 1.5], groups: 5, perGroup: 1, emoji: "🪀" },
+                        { eq: "15% × 200 = ?", text: "Berapakah nilai dari 15% dikali 200?", ans: 30, opts: [20, 25, 30, 35], groups: 3, perGroup: 10, emoji: "🪀" }
+                    ]},
+                    { badge: "Luas Segitiga & Jajar Genjang", questions: [
+                        { eq: "L = 1/2 × 14 × 10", text: "Atap joglo berbentuk segitiga dengan alas 14 m dan tinggi 10 m. Berapa m² luasnya?", ans: 70, opts: [35, 70, 120, 140], groups: 7, perGroup: 10, emoji: "🔺" },
+                        { eq: "L Jajar Genjang (16×9)", text: "Sebuah taman berbentuk jajar genjang dengan alas 16 m dan tinggi 9 m. Berapa m² luasnya?", ans: 144, opts: [72, 128, 144, 160], groups: 9, perGroup: 16, emoji: "▱" },
+                        { eq: "Alas = (2×48) ÷ 8", text: "Luas segitiga 48 cm² dan tingginya 8 cm. Berapa cm panjang alasnya?", ans: 12, opts: [6, 8, 12, 16], groups: 6, perGroup: 2, emoji: "📐" }
+                    ]},
+                    { badge: "Volume Kubus & Balok", questions: [
+                        { eq: "V = 6 × 6 × 6 = ?", text: "Kotak penyimpanan bambu berbentuk kubus dengan rusuk 6 dm. Berapa liter (dm³) volumenya?", ans: 216, opts: [36, 108, 216, 256], groups: 6, perGroup: 6, emoji: "📦" },
+                        { eq: "V = 10 × 6 × 5 = ?", text: "Bak air berbentuk balok berukuran 10 dm × 6 dm × 5 dm. Berapa liter volumenya?", ans: 300, opts: [150, 250, 300, 350], groups: 6, perGroup: 5, emoji: "🧊" },
+                        { eq: "Rusuk Kubus (V=125)", text: "Sebuah kubus memiliki volume 125 cm³. Berapa cm panjang rusuknya?", ans: 5, opts: [3, 4, 5, 25], groups: 5, perGroup: 5, emoji: "🎲" }
+                    ]},
+                    { badge: "Kecepatan (J = K × W)", questions: [
+                        { eq: "J = 60 km/jam × 3 jam", text: "Kapal melaju dengan kecepatan 60 km/jam selama 3 jam. Berapa km jarak yang ditempuh?", ans: 180, opts: [120, 150, 180, 200], groups: 3, perGroup: 6, emoji: "⛵" },
+                        { eq: "K = 150 km ÷ 3 jam", text: "Jarak Makassar ke Parepare 150 km ditempuh dalam 3 jam. Berapa km/jam kecepatannya?", ans: 50, opts: [40, 45, 50, 60], groups: 3, perGroup: 5, emoji: "🚌" },
+                        { eq: "W = 240 km ÷ 80", text: "Jarak 240 km ditempuh dengan kecepatan 80 km/jam. Berapa jam waktu tempuhnya?", ans: 3, opts: [2, 3, 4, 5], groups: 3, perGroup: 8, emoji: "⏱️" }
+                    ]},
+                    { badge: "Skala & Denah", questions: [
+                        { eq: "5 cm × 200.000 = ? km", text: "Skala peta Bali 1 : 200.000. Jika jarak di peta 5 cm, berapa km jarak sebenarnya?", ans: 10, opts: [1, 5, 10, 100], groups: 5, perGroup: 2, emoji: "🗺️" },
+                        { eq: "12 km ÷ 300.000 = ? cm", text: "Jarak dua pura 12 km (1.200.000 cm). Pada peta berskala 1 : 300.000, berapa cm jaraknya?", ans: 4, opts: [3, 4, 6, 40], groups: 4, perGroup: 3, emoji: "📍" },
+                        { eq: "4 cm × 500 = ? m", text: "Denah panggung tari berskala 1 : 500. Jika lebar di denah 4 cm, berapa meter lebar aslinya?", ans: 20, opts: [2, 10, 20, 200], groups: 4, perGroup: 5, emoji: "🏛️" }
+                    ]},
+                    { badge: "Debit & Satuan Volume", questions: [
+                        { eq: "V = 15 L/menit × 8", text: "Debit air pancuran di Maluku 15 liter/menit. Dalam 8 menit, berapa liter air yang mengalir?", ans: 120, opts: [90, 105, 120, 150], groups: 8, perGroup: 15, emoji: "💧" },
+                        { eq: "D = 240 L ÷ 6 menit", text: "Sebuah bak 240 liter terisi penuh dalam 6 menit. Berapa liter/menit debit airnya?", ans: 40, opts: [30, 35, 40, 45], groups: 6, perGroup: 4, emoji: "🚰" },
+                        { eq: "3.500 mL = ? Liter", text: "Ubahlah satuan volume 3.500 mililiter (mL) ke dalam Liter!", ans: 3.5, opts: [0.35, 3.5, 35, 350], groups: 7, perGroup: 1, emoji: "🧪" }
+                    ]},
+                    { badge: "Boss Kelas 5 SD", questions: [
+                        { eq: "V = 12 × 8 × 5 = ?", text: "Peti harta karun Papua berukuran 12 dm × 8 dm × 5 dm. Berapa liter volumenya?", ans: 480, opts: [360, 420, 480, 520], groups: 8, perGroup: 6, emoji: "📦" },
+                        { eq: "35% dari 300 = ?", text: "Tantangan Boss 1: Hitunglah nilai dari 35% × 300!", ans: 105, opts: [95, 100, 105, 115], groups: 7, perGroup: 15, emoji: "👑" },
+                        { eq: "J = 75 km/jam × 4 jam", text: "Tantangan Boss Terakhir: Kapal melaju 75 km/jam selama 4 jam. Berapa km jaraknya?", ans: 300, opts: [250, 280, 300, 320], groups: 4, perGroup: 15, emoji: "🏆" }
+                    ]}
+                ]
+            },
+            6: {
+                gradeName: "Kelas 6 SD",
+                fase: "Fase C",
+                summary: "Bilangan Bulat Negatif, Lingkaran (π), Volume Tabung/Prisma, Rasio & Statistika",
+                topics: [
+                    { badge: "Bilangan Bulat", questions: [
+                        { eq: "-12 + 20 = ?", text: "Suhu puncak gunung -12°C lalu naik 20°C saat siang. Berapa °C suhunya sekarang?", ans: 8, opts: [-32, -8, 8, 32], groups: 8, perGroup: 1, emoji: "🌡️" },
+                        { eq: "-15 - (-9) = ?", text: "Hitunglah hasil operasi bilangan bulat: -15 - (-9) = ...", ans: -6, opts: [-24, -6, 6, 24], groups: 6, perGroup: 1, emoji: "🪀" },
+                        { eq: "(-8) × (-6) = ?", text: "Berapakah hasil perkalian bilangan negatif (-8) × (-6)?", ans: 48, opts: [-48, -14, 14, 48], groups: 6, perGroup: 8, emoji: "🔢" }
+                    ]},
+                    { badge: "Keliling & Luas Lingkaran", questions: [
+                        { eq: "K = 22/7 × 14 = ?", text: "Papan congklak bundar berdiameter 14 cm (π = 22/7). Berapa cm kelilingnya?", ans: 44, opts: [22, 44, 88, 154], groups: 4, perGroup: 11, emoji: "⭕" },
+                        { eq: "L = 22/7 × 7 × 7 = ?", text: "Hitung luas lingkaran berjari-jari r = 7 cm (π = 22/7)!", ans: 154, opts: [44, 88, 154, 308], groups: 7, perGroup: 11, emoji: "📀" },
+                        { eq: "L = 3,14 × 10 × 10 = ?", text: "Tampah bambu berjari-jari 10 cm (π = 3,14). Berapa cm² luas permukaannya?", ans: 314, opts: [31.4, 62.8, 314, 628], groups: 10, perGroup: 10, emoji: "🥏" }
+                    ]},
+                    { badge: "Volume Tabung & Prisma", questions: [
+                        { eq: "V = 154 × 10 = ?", text: "Tabung bambu memiliki luas alas 154 cm² dan tinggi 10 cm. Berapa cm³ volumenya?", ans: 1540, opts: [154, 770, 1540, 3080], groups: 10, perGroup: 15, emoji: "🎋" },
+                        { eq: "V Prisma = 36 × 12", text: "Prisma segitiga memiliki luas alas 36 cm² dan tinggi 12 cm. Berapa cm³ volumenya?", ans: 432, opts: [216, 360, 432, 480], groups: 12, perGroup: 6, emoji: "⛺" },
+                        { eq: "V Limas = 1/3 × 90 × 8", text: "Limas segiempat luas alasnya 90 cm² dan tingginya 8 cm. Berapa cm³ volumenya?", ans: 240, opts: [180, 240, 360, 720], groups: 8, perGroup: 10, emoji: "🔺" }
+                    ]},
+                    { badge: "Rasio & Proporsi", questions: [
+                        { eq: "Rasio 3 : 5 (Total 40)", text: "Perbandingan pemain putra dan putri 3 : 5. Jika total 40 siswa, berapa banyak siswa putri?", ans: 25, opts: [15, 20, 25, 30], groups: 5, perGroup: 5, emoji: "🤸" },
+                        { eq: "4 : 7 = 16 : ?", text: "Rasio tali merah dan biru adalah 4 : 7. Jika tali merah 16 buah, berapa tali biru?", ans: 28, opts: [21, 24, 28, 35], groups: 4, perGroup: 7, emoji: "🧵" },
+                        { eq: "120 : 180 = 2 : ?", text: "Sederhanakan perbandingan 120 : 180 menjadi bentuk paling sederhana 2 : ...", ans: 3, opts: [2, 3, 4, 5], groups: 3, perGroup: 1, emoji: "⚖️" }
+                    ]},
+                    { badge: "Statistika (Mean, Median)", questions: [
+                        { eq: "Mean (7, 8, 9, 8, 8)", text: "Nilai 5 penari: 7, 8, 9, 8, 8. Berapakah nilai rata-rata (Mean) mereka?", ans: 8, opts: [7, 7.5, 8, 8.5], groups: 5, perGroup: 8, emoji: "📊" },
+                        { eq: "Median (6, 7, 8, 9, 10)", text: "Data terurut: 6, 7, 8, 9, 10. Berapakah nilai tengah (Median) data tersebut?", ans: 8, opts: [7, 8, 8.5, 9], groups: 5, perGroup: 1, emoji: "📈" },
+                        { eq: "Modus (7, 9, 8, 9, 9, 7)", text: "Dari data nilai: 7, 9, 8, 9, 9, 7, angka berapakah yang paling sering muncul (Modus)?", ans: 9, opts: [7, 8, 9, 10], groups: 3, perGroup: 3, emoji: "🏅" }
+                    ]},
+                    { badge: "Luas Permukaan Bangun", questions: [
+                        { eq: "LP Kubus = 6 × 8²", text: "Kotak rempah Maluku berbentuk kubus dengan rusuk 8 cm. Berapa cm² luas permukaannya?", ans: 384, opts: [64, 256, 384, 512], groups: 6, perGroup: 8, emoji: "📦" },
+                        { eq: "LP Balok (10×6×4)", text: "Peti kayu berukuran 10 cm × 6 cm × 4 cm. Berapa cm² luas permukaannya?", ans: 248, opts: [124, 240, 248, 260], groups: 6, perGroup: 4, emoji: "🧰" },
+                        { eq: "Tinggi Tabung (V=628, r=5)", text: "Tabung berjari-jari 5 cm (π = 3,14, luas alas 78,5 cm²) bervolume 628 cm³. Berapa cm tingginya?", ans: 8, opts: [4, 6, 8, 10], groups: 8, perGroup: 5, emoji: "🥁" }
+                    ]},
+                    { badge: "Boss Kelas 6 SD", questions: [
+                        { eq: "(-24) ÷ 6 + 15 = ?", text: "Tantangan Boss 1: Hitunglah hasil operasi campuran bilangan bulat (-24) ÷ 6 + 15!", ans: 11, opts: [-19, -11, 11, 19], groups: 4, perGroup: 6, emoji: "🏹" },
+                        { eq: "L = 22/7 × 14 × 14 = ?", text: "Tantangan Boss 2: Sasaran panah berbentuk lingkaran berjari-jari 14 cm (π = 22/7). Berapa cm² luasnya?", ans: 616, opts: [88, 154, 308, 616], groups: 7, perGroup: 11, emoji: "🎯" },
+                        { eq: "Mean (80, 85, 90, 95, 100)", text: "Tantangan Boss Terakhir: Berapa rata-rata skor 5 tahap: 80, 85, 90, 95, dan 100?", ans: 90, opts: [85, 88, 90, 95], groups: 5, perGroup: 9, emoji: "🏆" }
+                    ]}
+                ]
+            }
+        };
+
+        // Menggabungkan data 7 pulau dengan soal sesuai jenjang kelas (mendukung soal kustom dari Admin)
+        let customQuestionsStore = {}; // format key: "g{grade}_p{posId}" -> array of question objects
+
+        function getQuestionsForGradeAndPos(grade, posId) {
+            const customKey = `g${grade}_p${posId}`;
+            if (customQuestionsStore[customKey] && Array.isArray(customQuestionsStore[customKey]) && customQuestionsStore[customKey].length > 0) {
+                return customQuestionsStore[customKey];
+            }
+            const curr = CURRICULUM_DATA[grade] || CURRICULUM_DATA[3];
+            const topic = curr.topics[posId] || curr.topics[0];
+            return topic.questions;
+        }
+
+        function getPosDataForGrade(grade) {
+            const curr = CURRICULUM_DATA[grade] || CURRICULUM_DATA[3];
+            return BASE_ISLANDS.map((islandObj, idx) => {
+                const topic = curr.topics[idx] || curr.topics[0];
+                return {
+                    ...islandObj,
+                    shortBadge: topic.badge,
+                    questions: getQuestionsForGradeAndPos(grade, idx)
+                };
+            });
+        }
+
+        // State Permainan & Cache Data Cloud Real-Time
+        let cloudStudentsList = [];
+        let cloudLogsList = [];
+
+        let gameState = {
+            playerName: "",
+            grade: 3,
+            roomCode: "",
+            gradeLocked: false,
+            unlockedPos: 0,
+            completedPos: [],
+            stars: 0
+        };
+
+        let selectedWelcomeGrade = 3;
+        let currentPosId = 0;
+        let currentQuestionIdx = 0;
+        let isAnswering = false;
+        let isAdminAuthenticated = false;
+
+        // Audio & Narator State
+        let ttsEnabled = true;
+        let bgmEnabled = false;
+        let bgmLoop = null;
+        let bgmSynth = null;
+        let sfxSynth = null;
+        let lastSfxTime = 0;
+
+        function playSound(type) {
+            try {
+                if (typeof Tone === 'undefined') return;
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                if (!sfxSynth) {
+                    sfxSynth = new Tone.PolySynth(Tone.Synth).toDestination();
+                    sfxSynth.volume.value = -8;
+                }
+                const now = Math.max(Tone.now(), lastSfxTime + 0.05);
+                lastSfxTime = now;
+
+                if (type === 'click') {
+                    sfxSynth.triggerAttackRelease("C5", "16n", now);
+                } else if (type === 'correct') {
+                    sfxSynth.triggerAttackRelease(["C5", "E5", "G5"], "8n", now);
+                } else if (type === 'wrong') {
+                    sfxSynth.triggerAttackRelease(["Eb3", "D3"], "8n", now);
+                } else if (type === 'victory') {
+                    sfxSynth.triggerAttackRelease(["C5", "E5", "G5", "C6"], "4n", now);
+                }
+            } catch (e) {
+                // Abaikan jika browser memblokir audio sementara
+            }
+        }
+
+        async function initCloudSync() {
+            const statusTextEl = document.getElementById('cloud-connection-text');
+            const uidEl = document.getElementById('cloud-device-uid');
+            if (!auth || !db) {
+                if (statusTextEl) statusTextEl.textContent = "Mode Sesi Lokal (Cloud Tidak Aktif)";
+                return;
+            }
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = cred.user;
+                } else {
+                    const cred = await signInAnonymously(auth);
+                    currentUser = cred.user;
+                }
+                cloudReady = true;
+                if (statusTextEl) statusTextEl.textContent = "Terhubung Real-Time (Semua Browser & Device)";
+                if (uidEl && currentUser) uidEl.textContent = currentUser.uid;
+
+                // Dengarkan perubahan data siswa secara real-time lintas perangkat
+                const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'nusantara_students');
+                onSnapshot(studentsCol, (snapshot) => {
+                    const list = [];
+                    snapshot.forEach((docSnap) => {
+                        list.push({ docId: docSnap.id, ...docSnap.data() });
+                    });
+                    list.sort((a, b) => (b.lastActive || '').localeCompare(a.lastActive || ''));
+                    cloudStudentsList = list;
+                    if (isAdminAuthenticated) {
+                        renderAdminDashboard();
+                    }
+                }, (error) => {
+                    console.warn("Gagal memuat data siswa cloud:", error);
+                });
+
+                // Dengarkan perubahan log aktivitas secara real-time lintas perangkat
+                const logsCol = collection(db, 'artifacts', appId, 'public', 'data', 'nusantara_logs');
+                onSnapshot(logsCol, (snapshot) => {
+                    const logs = [];
+                    snapshot.forEach((docSnap) => {
+                        logs.push({ docId: docSnap.id, ...docSnap.data() });
+                    });
+                    logs.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
+                    cloudLogsList = logs;
+                    if (isAdminAuthenticated) {
+                        renderAdminDashboard();
+                    }
+                }, (error) => {
+                    console.warn("Gagal memuat log aktivitas cloud:", error);
+                });
+
+                // Dengarkan perubahan Bank Soal Kustom dari Admin secara real-time
+                const qmCol = collection(db, 'artifacts', appId, 'public', 'data', 'nusantara_custom_questions');
+                onSnapshot(qmCol, (snapshot) => {
+                    const updatedStore = {};
+                    snapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        if (data && Array.isArray(data.questions)) {
+                            updatedStore[docSnap.id] = data.questions;
+                        }
+                    });
+                    customQuestionsStore = updatedStore;
+                    if (isAdminAuthenticated) {
+                        renderAdminQuestionManager();
+                    }
+                    if (!document.getElementById('welcome-screen').classList.contains('hidden')) {
+                        return;
+                    }
+                    updateUI();
+                }, (error) => {
+                    console.warn("Gagal memuat bank soal kustom cloud:", error);
+                });
+
+                // Jika siswa sudah memasukkan nama sebelum auth selesai, langsung sinkronkan
+                if (gameState.playerName) {
+                    syncCurrentStudentToAdmin(0, 0, 0);
+                }
+            } catch (e) {
+                console.warn("Autentikasi cloud gagal:", e);
+                if (statusTextEl) statusTextEl.textContent = "Gagal terhubung ke cloud";
+            }
+        }
+
+        function initAndStartBGM() {
+            try {
+                if (typeof Tone === 'undefined' || bgmLoop) return;
+                Tone.start();
+                bgmSynth = new Tone.Synth({
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.05, decay: 0.2, sustain: 0.2, release: 0.6 }
+                }).toDestination();
+                bgmSynth.volume.value = -18;
+
+                // Melodi pentatonis slendro ceria Nusantara
+                const melody = ["C4", "D4", "E4", "G4", "A4", "G4", "E4", "D4"];
+                let step = 0;
+                let lastTriggerTime = 0;
+
+                bgmLoop = new Tone.Loop((time) => {
+                    if (bgmEnabled && bgmSynth && time > lastTriggerTime + 0.05) {
+                        lastTriggerTime = time;
+                        bgmSynth.triggerAttackRelease(melody[step % melody.length], "8n", time);
+                        step++;
+                    }
+                }, "4n");
+
+                bgmEnabled = true;
+                Tone.Transport.bpm.value = 105;
+                bgmLoop.start(0);
+                Tone.Transport.start("+0.1");
+                updateAudioButtonsUI();
+            } catch (e) {
+                console.warn("BGM tidak dapat dimulai:", e);
+            }
+        }
+
+        function toggleBGM() {
+            if (!bgmLoop) {
+                initAndStartBGM();
+                return;
+            }
+            bgmEnabled = !bgmEnabled;
+            updateAudioButtonsUI();
+        }
+
+        function toggleTTS() {
+            ttsEnabled = !ttsEnabled;
+            if (!ttsEnabled && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            updateAudioButtonsUI();
+        }
+
+        function updateAudioButtonsUI() {
+            const bgmIcon = document.getElementById('bgm-icon');
+            const bgmLabel = document.getElementById('bgm-label');
+            if (bgmIcon) bgmIcon.textContent = bgmEnabled ? '🎵' : '🔇';
+            if (bgmLabel) bgmLabel.textContent = bgmEnabled ? 'Musik On' : 'Musik Off';
+
+            const ttsIcon = document.getElementById('tts-icon');
+            const ttsLabel = document.getElementById('tts-label');
+            if (ttsIcon) ttsIcon.textContent = ttsEnabled ? '🔊' : '🔇';
+            if (ttsLabel) ttsLabel.textContent = ttsEnabled ? 'Narator' : 'Bisukan';
+        }
+
+        function speakText(text) {
+            if (!ttsEnabled || !('speechSynthesis' in window)) return;
+            try {
+                window.speechSynthesis.cancel();
+                const cleanText = text.replace(/×/g, ' dikali ').replace(/÷/g, ' dibagi ').replace(/=/g, ' sama dengan ');
+                const utter = new SpeechSynthesisUtterance(cleanText);
+                utter.lang = 'id-ID';
+                utter.rate = 0.98;
+                utter.pitch = 1.08;
+                window.speechSynthesis.speak(utter);
+            } catch (e) {
+                // Abaikan jika speechSynthesis tidak tersedia
+            }
+        }
+
+        function readCurrentQuestionAloud() {
+            const pos = getPosDataForGrade(gameState.grade)[currentPosId];
+            const q = pos.questions[currentQuestionIdx];
+            speakText(`${pos.story} ${q.text}`);
+        }
+
+        function readFactAloud() {
+            const pos = getPosDataForGrade(gameState.grade)[currentPosId];
+            speakText(`${pos.factTitle}. ${pos.factBody}`);
+        }
+
+        // ==================== INISIALISASI & NAVIGASI AWAL ====================
+        function applyInviteUrlParams() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const gradeParam = parseInt(params.get('kelas') || params.get('grade'), 10);
+                const roomParam = (params.get('ruang') || params.get('room') || '').trim();
+                const studentParam = (params.get('siswa') || params.get('student') || '').trim();
+                const lockParam = params.get('kunci') === '1' || params.get('lock') === '1';
+
+                if (gradeParam >= 1 && gradeParam <= 6) {
+                    selectWelcomeGrade(gradeParam);
+                    gameState.grade = gradeParam;
+                }
+                if (roomParam) {
+                    gameState.roomCode = roomParam;
+                }
+                if (studentParam) {
+                    const nameInput = document.getElementById('player-name-input');
+                    if (nameInput) nameInput.value = studentParam;
+                }
+                if (lockParam && gradeParam >= 1 && gradeParam <= 6) {
+                    gameState.gradeLocked = true;
+                    document.querySelectorAll('.grade-select-btn').forEach(btn => {
+                        btn.disabled = true;
+                        btn.classList.add('opacity-70', 'cursor-not-allowed');
+                    });
+                    const headerSelect = document.getElementById('header-grade-select');
+                    if (headerSelect) headerSelect.disabled = true;
+                }
+
+                if ((gradeParam >= 1 && gradeParam <= 6) || roomParam || studentParam) {
+                    const banner = document.getElementById('invite-link-banner');
+                    const desc = document.getElementById('invite-link-desc');
+                    if (banner && desc) {
+                        banner.classList.remove('hidden');
+                        const kelasTxt = gradeParam ? `Kelas ${gradeParam} SD` : '';
+                        const ruangTxt = roomParam ? ` • Ruang: ${roomParam}` : '';
+                        desc.textContent = `Kamu masuk melalui link khusus guru (${kelasTxt}${ruangTxt})`;
+                    }
+                }
+            } catch (e) {
+                console.warn("Gagal membaca parameter URL:", e);
+            }
+        }
+
+        window.onload = async function () {
+            const today = new Date();
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            const certDateEl = document.getElementById('cert-date');
+            if (certDateEl) {
+                certDateEl.textContent = today.toLocaleDateString('id-ID', options);
+            }
+            applyInviteUrlParams();
+            updateGeneratedStudentLink();
+            await initCloudSync();
+        };
+
+        function selectWelcomeGrade(grade) {
+            if (gameState.gradeLocked) return;
+            selectedWelcomeGrade = grade;
+            document.querySelectorAll('.grade-select-btn').forEach(btn => {
+                const g = parseInt(btn.getAttribute('data-grade'), 10);
+                if (g === grade) {
+                    btn.className = "grade-select-btn bg-amber-400 border-2 border-amber-600 text-amber-950 font-display font-bold py-2 px-1 rounded-xl text-xs sm:text-sm shadow-sm scale-105 transition";
+                } else {
+                    btn.className = "grade-select-btn bg-slate-100 hover:bg-amber-100 border-2 border-slate-200 text-slate-700 font-display font-bold py-2 px-1 rounded-xl text-xs sm:text-sm transition";
+                }
+            });
+            const curr = CURRICULUM_DATA[grade];
+            const descEl = document.getElementById('grade-desc-box');
+            if (descEl && curr) {
+                descEl.innerHTML = `<span class="font-bold text-indigo-800">${curr.gradeName} (${curr.fase})</span> • <span class="text-slate-600">${curr.summary}</span>`;
+            }
+        }
+
+        function changeGradeFromHeader(newGradeStr) {
+            if (gameState.gradeLocked) return;
+            const newGrade = parseInt(newGradeStr, 10);
+            if (!newGrade || newGrade === gameState.grade) return;
+            playSound('click');
+            gameState.grade = newGrade;
+            gameState.unlockedPos = 0;
+            gameState.completedPos = [];
+            gameState.stars = 0;
+            syncCurrentStudentToAdmin(0, 0, 0);
+            logStudentActivity('grade_change', `Berpindah jenjang ke Kelas ${newGrade} SD`);
+            document.getElementById('btn-open-cert').classList.add('hidden');
+            updateUI();
+            const curr = CURRICULUM_DATA[newGrade];
+            speakText(`Berpindah ke ${curr.gradeName} Kurikulum Merdeka! Materi kali ini adalah ${curr.summary}.`);
+        }
+
+        function startAdventure() {
+            const input = document.getElementById('player-name-input');
+            const name = input.value.trim();
+            if (!name) {
+                document.getElementById('name-error').classList.remove('hidden');
+                input.focus();
+                speakText("Yuk isi nama lengkap adik dulu sebelum berlayar!");
+                return;
+            }
+            document.getElementById('name-error').classList.add('hidden');
+            playSound('victory');
+            initAndStartBGM();
+            gameState.playerName = name;
+            gameState.grade = selectedWelcomeGrade;
+            syncCurrentStudentToAdmin(0, 0, 0);
+            logStudentActivity('start', `Memulai petualangan Nusantara di Kelas ${gameState.grade} SD`);
+            document.getElementById('welcome-screen').classList.add('hidden');
+            updateUI();
+            const curr = CURRICULUM_DATA[gameState.grade];
+            speakText(`Selamat datang Kapten ${name} di ${curr.gradeName}! Ayo klik pos pulau Sumatra yang berkilau untuk memulai petualangan kita!`);
+        }
+
+        // ==================== RENDER PETA & KARTU POS ====================
+        function updateUI() {
+            const curr = CURRICULUM_DATA[gameState.grade] || CURRICULUM_DATA[3];
+            const posList = getPosDataForGrade(gameState.grade);
+
+            document.getElementById('header-player-name').textContent = gameState.playerName || "Penjelajah";
+            document.getElementById('header-grade-select').value = String(gameState.grade);
+            const roomSuffix = gameState.roomCode ? ` • Ruang ${gameState.roomCode}` : '';
+            document.getElementById('header-curriculum-badge').textContent = `Kurikulum Merdeka • ${curr.fase}${roomSuffix}`;
+            document.getElementById('total-stars').textContent = `${gameState.stars} / 21`;
+            document.getElementById('progress-text').textContent = `${gameState.completedPos.length} / 7 Pulau`;
+
+            if (gameState.completedPos.length === 7) {
+                document.getElementById('btn-open-cert').classList.remove('hidden');
+                document.getElementById('mission-banner-title').textContent = "Selamat! Misi Sabang Sampai Merauke Tuntas!";
+                document.getElementById('mission-banner-subtitle').textContent = "Klik tombol 🏆 Sertifikat di atas untuk melihat dan mencetak sertifikat kelulusanmu!";
+            } else {
+                const activePos = posList[gameState.unlockedPos] || posList[0];
+                document.getElementById('mission-banner-title').textContent = `Tujuan Berikutnya: Pos ${activePos.id + 1} (${activePos.island})`;
+                document.getElementById('mission-banner-subtitle').textContent = `${activePos.gameName} • Materi ${curr.gradeName}: ${activePos.shortBadge}`;
+            }
+
+            // Pindahkan kapal ke posisi pos terbaru
+            const shipPos = posList[Math.min(gameState.unlockedPos, posList.length - 1)];
+            const shipGroup = document.getElementById('ship-group');
+            if (shipGroup && shipPos) {
+                shipGroup.setAttribute('transform', `translate(${shipPos.shipX}, ${shipPos.shipY})`);
+            }
+
+            renderMapPins(posList);
+            renderPosCards(posList);
+        }
+
+        function renderMapPins(posList) {
+            const layer = document.getElementById('map-pins-layer');
+            if (!layer) return;
+
+            layer.innerHTML = posList.map(pos => {
+                const isDone = gameState.completedPos.includes(pos.id);
+                const isUnlocked = pos.id <= gameState.unlockedPos;
+                const isCurrent = pos.id === gameState.unlockedPos && !isDone;
+
+                const fillColor = isDone ? "#10b981" : (isUnlocked ? "#f59e0b" : "#94a3b8");
+                const strokeColor = isDone ? "#065f46" : (isUnlocked ? "#92400e" : "#475569");
+                const clickAttr = isUnlocked ? `onclick="openPosModal(${pos.id})"` : "";
+                const cursorClass = isCurrent ? "pos-active" : (isUnlocked ? "cursor-pointer" : "opacity-75");
+
+                return `
+                    <g transform="translate(${pos.mapX}, ${pos.mapY})" ${clickAttr} class="${cursorClass}">
+                        <circle cx="0" cy="0" r="20" fill="${fillColor}" stroke="${strokeColor}" stroke-width="3.5"/>
+                        <text x="0" y="6" text-anchor="middle" font-size="18">${isDone ? "✅" : (isUnlocked ? pos.icon : "🔒")}</text>
+                        <rect x="-48" y="24" width="96" height="20" rx="8" fill="#ffffff" stroke="${strokeColor}" stroke-width="1.5"/>
+                        <text x="0" y="37" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#0f172a">
+                            ${pos.id + 1}. ${pos.island.split(' ')[0]}
+                        </text>
+                    </g>
+                `;
+            }).join('');
+        }
+
+        function renderPosCards(posList) {
+            const grid = document.getElementById('pos-cards-grid');
+            if (!grid) return;
+
+            grid.innerHTML = posList.map(pos => {
+                const isDone = gameState.completedPos.includes(pos.id);
+                const isUnlocked = pos.id <= gameState.unlockedPos;
+                const isCurrent = pos.id === gameState.unlockedPos && !isDone;
+
+                const borderClass = isDone
+                    ? "border-emerald-400 bg-emerald-50/40"
+                    : (isCurrent ? "border-amber-400 ring-4 ring-amber-300/60 bg-white" : (isUnlocked ? "border-sky-300 bg-white" : "border-slate-200 bg-slate-100 opacity-75"));
+
+                const cultureBadges = pos.cultures.slice(0, 2).map(c =>
+                    `<span class="bg-slate-100 text-slate-700 text-[11px] font-bold px-2 py-0.5 rounded-lg border border-slate-200">${c.icon} ${c.value}</span>`
+                ).join('');
+
+                return `
+                    <div class="rounded-3xl border-2 ${borderClass} p-4 shadow-md flex flex-col justify-between transition hover:-translate-y-1">
+                        <div>
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${pos.color} text-white flex items-center justify-center text-2xl shadow">
+                                    ${pos.icon}
+                                </div>
+                                <span class="text-xs font-extrabold px-2.5 py-1 rounded-full ${isDone ? 'bg-emerald-100 text-emerald-800' : (isUnlocked ? 'bg-amber-100 text-amber-900' : 'bg-slate-200 text-slate-600')}">
+                                    ${isDone ? '⭐⭐⭐ Selesai' : (isCurrent ? '🔥 Misi Aktif' : (isUnlocked ? 'Terbuka' : '🔒 Terkunci'))}
+                                </span>
+                            </div>
+                            <span class="text-[11px] font-extrabold uppercase text-sky-700">Pos ${pos.id + 1} • ${pos.island}</span>
+                            <h4 class="font-display font-bold text-lg text-slate-900 leading-snug mb-1">${pos.gameName}</h4>
+                            <p class="text-xs font-bold text-indigo-700 bg-indigo-50 inline-block px-2.5 py-0.5 rounded-lg mb-2">
+                                📐 ${pos.shortBadge}
+                            </p>
+                            <div class="flex flex-wrap gap-1 mb-3">
+                                ${cultureBadges}
+                            </div>
+                        </div>
+
+                        <button ${isUnlocked ? `onclick="openPosModal(${pos.id})"` : 'disabled'}
+                            class="w-full py-2.5 rounded-xl font-display font-bold text-sm transition ${isDone
+                                ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                                : (isUnlocked ? 'bg-amber-400 hover:bg-amber-500 text-amber-950 shadow-[0_3px_0_#b45309]' : 'bg-slate-300 text-slate-500 cursor-not-allowed')}">
+                            ${isDone ? 'Mainkan Lagi 🔄' : (isUnlocked ? 'Berlayar ke Sini ⛵' : 'Selesaikan Pos Sebelumnya')}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== LOGIKA SOAL & JAWABAN ====================
+        function openPosModal(posId) {
+            playSound('click');
+            currentPosId = posId;
+            currentQuestionIdx = 0;
+            isAnswering = false;
+
+            const pos = getPosDataForGrade(gameState.grade)[posId];
+            document.getElementById('modal-header-bg').className = `bg-gradient-to-r ${pos.color} p-4 text-white flex items-center justify-between`;
+            document.getElementById('modal-pos-icon').textContent = pos.icon;
+            document.getElementById('modal-pos-badge').textContent = `Pos ${pos.id + 1} • ${pos.island} • ${pos.shortBadge}`;
+            document.getElementById('modal-pos-title').textContent = pos.gameName;
+            document.getElementById('modal-story-text').textContent = pos.story;
+
+            document.getElementById('game-modal').classList.remove('hidden');
+            renderQuestion();
+            readCurrentQuestionAloud();
+        }
+
+        function closeGameModal() {
+            playSound('click');
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            document.getElementById('game-modal').classList.add('hidden');
+        }
+
+        function renderQuestion() {
+            isAnswering = false;
+            const pos = getPosDataForGrade(gameState.grade)[currentPosId];
+            const q = pos.questions[currentQuestionIdx];
+
+            document.getElementById('question-counter').textContent = `Soal ${currentQuestionIdx + 1} dari ${pos.questions.length}`;
+            document.getElementById('question-text').textContent = q.text;
+
+            const eqText = q.eq ? q.eq : `${q.a} × ${q.b} = ?`;
+            const eqBadge = document.getElementById('math-equation-badge');
+            eqBadge.textContent = eqText;
+            eqBadge.className = "inline-block bg-sky-100 text-sky-900 font-display font-bold text-2xl sm:text-3xl px-5 py-2 rounded-2xl border-2 border-sky-300";
+
+            const fb = document.getElementById('feedback-box');
+            fb.classList.add('hidden');
+
+            // Render visual pengelompokan benda
+            const visualBox = document.getElementById('visual-aid-box');
+            const numGroups = Math.min(q.groups || 4, 10);
+            const itemsPerGroup = Math.min(q.perGroup || 4, 10);
+            let groupsHtml = '';
+            for (let g = 0; g < numGroups; g++) {
+                let items = '';
+                for (let i = 0; i < itemsPerGroup; i++) {
+                    items += `<span class="${pos.id === 0 ? 'spin-toy' : ''} text-sm sm:text-base">${q.emoji || pos.icon}</span>`;
+                }
+                groupsHtml += `<div class="bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-xs flex flex-wrap justify-center gap-0.5 max-w-[110px]">${items}</div>`;
+            }
+            visualBox.innerHTML = groupsHtml;
+
+            // Render tombol opsi jawaban
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = q.opts.map(opt => `
+                <button onclick='checkAnswer(${JSON.stringify(opt)}, ${JSON.stringify(q.ans)}, this)'
+                    class="btn-3d bg-white hover:bg-amber-50 border-2 border-slate-300 hover:border-amber-400 text-slate-800 font-display font-bold text-xl sm:text-2xl py-3.5 rounded-2xl shadow-[0_4px_0_#cbd5e1] transition">
+                    ${opt}
+                </button>
+            `).join('');
+        }
+
+        function checkAnswer(selected, correct, btnElement) {
+            if (isAnswering) return;
+            const fb = document.getElementById('feedback-box');
+            fb.classList.remove('hidden');
+            const pos = getPosDataForGrade(gameState.grade)[currentPosId];
+            const q = pos.questions[currentQuestionIdx];
+            const eqLabel = q.eq ? q.eq : `${q.a} × ${q.b}`;
+
+            if (selected === correct) {
+                isAnswering = true;
+                playSound('correct');
+                btnElement.className = "bg-emerald-500 border-2 border-emerald-700 text-white font-display font-bold text-2xl py-3.5 rounded-2xl shadow-inner scale-105 transition";
+
+                const solvedEq = q.eq ? q.eq.replace('?', correct) : `${q.a} × ${q.b} = ${correct}`;
+                const eqBadge = document.getElementById('math-equation-badge');
+                eqBadge.textContent = solvedEq;
+                eqBadge.className = "inline-block bg-emerald-100 text-emerald-900 font-display font-bold text-2xl sm:text-3xl px-5 py-2 rounded-2xl border-2 border-emerald-400";
+
+                fb.className = "mt-4 p-3.5 rounded-2xl text-center font-bold text-base bg-emerald-100 text-emerald-800 border-2 border-emerald-300";
+                fb.innerHTML = `🌟 Tepat Sekali! Jawabannya adalah <b>${correct}</b>!`;
+                speakText(`Tepat sekali! Jawabannya adalah ${correct}!`);
+
+                syncCurrentStudentToAdmin(1, 0, 0);
+                logStudentActivity('correct', `Menjawab benar (${selected}) pada ${pos.island} - Soal ${currentQuestionIdx + 1} [${eqLabel}]`);
+
+                setTimeout(() => {
+                    currentQuestionIdx++;
+                    if (currentQuestionIdx < pos.questions.length) {
+                        renderQuestion();
+                        readCurrentQuestionAloud();
+                    } else {
+                        completeCurrentPos();
+                    }
+                }, 1500);
+            } else {
+                playSound('wrong');
+                btnElement.className = "bg-rose-100 border-2 border-rose-400 text-rose-700 font-display font-bold text-2xl py-3.5 rounded-2xl opacity-75";
+                fb.className = "mt-4 p-3.5 rounded-2xl text-center font-bold text-sm sm:text-base bg-rose-100 text-rose-800 border-2 border-rose-300";
+                fb.innerHTML = `Ups, belum pas! Coba hitung lagi atau klik tombol <b>💡 Bantuan Kakak Pintar</b> di atas ya!`;
+                speakText("Ups, belum pas! Coba hitung lagi atau klik tombol Bantuan Kakak Pintar ya!");
+
+                syncCurrentStudentToAdmin(0, 1, 0);
+                logStudentActivity('wrong', `Menjawab salah (${selected}, seharusnya ${correct}) pada ${pos.island} - Soal ${currentQuestionIdx + 1} [${eqLabel}]`);
+            }
+        }
+
+        function completeCurrentPos() {
+            playSound('victory');
+            document.getElementById('game-modal').classList.add('hidden');
+
+            const posList = getPosDataForGrade(gameState.grade);
+            const pos = posList[currentPosId];
+            if (!gameState.completedPos.includes(pos.id)) {
+                gameState.completedPos.push(pos.id);
+                gameState.stars += 3;
+                if (pos.id + 1 > gameState.unlockedPos && pos.id + 1 < posList.length) {
+                    gameState.unlockedPos = pos.id + 1;
+                }
+            }
+
+            syncCurrentStudentToAdmin(0, 0, 0);
+            logStudentActivity('complete_pos', `Menaklukkan Pos ${pos.id + 1}: ${pos.island} (${pos.shortBadge}) • Total ${gameState.stars}/21 Bintang`);
+
+            updateUI();
+
+            // Tampilkan Fakta Unik & Budaya Nusantara
+            document.getElementById('fact-title').textContent = pos.factTitle;
+            document.getElementById('fact-body').textContent = pos.factBody;
+            document.getElementById('fact-culture-grid').innerHTML = pos.cultures.map(c => `
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center gap-2">
+                    <span class="text-xl">${c.icon}</span>
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase text-slate-400 block">${c.label}</span>
+                        <span class="text-xs font-bold text-slate-800">${c.value}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            const nextBtn = document.getElementById('btn-next-island');
+            nextBtn.textContent = gameState.completedPos.length === 7 ? "Lihat Sertifikat Kelulusan! 🏆" : "Lanjut Berlayar! ⛵";
+
+            document.getElementById('fact-modal').classList.remove('hidden');
+            readFactAloud();
+        }
+
+        function closeFactAndSail() {
+            playSound('click');
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            document.getElementById('fact-modal').classList.add('hidden');
+            if (gameState.completedPos.length === 7) {
+                openCertificateModal();
+            }
+        }
+
+        // ==================== BANTUAN KAKAK PINTAR ====================
+        function openHelperModal() {
+            playSound('click');
+            const pos = getPosDataForGrade(gameState.grade)[currentPosId];
+            const q = pos.questions[currentQuestionIdx];
+            const container = document.getElementById('helper-content');
+
+            syncCurrentStudentToAdmin(0, 0, 1);
+            logStudentActivity('helper', `Membuka Bantuan Kakak Pintar di ${pos.island} (Soal ${currentQuestionIdx + 1})`);
+
+            let trickHtml = '';
+            if (gameState.grade === 3 && q.b === 9 && q.a) {
+                // Trik Jari Perkalian 9 Interaktif
+                const folded = q.a;
+                let fingers = '';
+                for (let f = 1; f <= 10; f++) {
+                    const isFolded = f === folded;
+                    fingers += `
+                        <div class="flex flex-col items-center">
+                            <div class="w-6 sm:w-7 ${isFolded ? 'h-5 bg-rose-400 border-rose-600 mt-5' : 'h-10 bg-amber-300 border-amber-500'} rounded-t-full border-2 flex items-center justify-center text-[10px] font-bold">
+                                ${f}
+                            </div>
+                        </div>
+                    `;
+                }
+                trickHtml = `
+                    <div class="bg-indigo-50 p-3.5 rounded-2xl border border-indigo-200">
+                        <p class="font-bold text-indigo-900 mb-2">🖐️ Trik Jari Perkalian 9 (${q.a} × 9):</p>
+                        <p class="text-xs mb-3">Buka 10 jarimu, lalu lipat jari ke-<b>${folded}</b>!</p>
+                        <div class="flex justify-center gap-1 mb-3">${fingers}</div>
+                        <p class="text-xs font-bold text-center text-indigo-900">
+                            Jari di kiri lipatan = <b>${folded - 1}</b> (puluhan) • Jari di kanan lipatan = <b>${10 - folded}</b> (satuan) ➔ <b>${(folded - 1) * 10 + (10 - folded)}</b>
+                        </p>
+                    </div>
+                `;
+            } else if (gameState.grade === 3 && q.a && q.b) {
+                const steps = Array.from({ length: q.a }, (_, i) => q.b * (i + 1)).join(' ➔ ');
+                trickHtml = `
+                    <div class="bg-indigo-50 p-3.5 rounded-2xl border border-indigo-200">
+                        <p class="font-bold text-indigo-900 mb-1">✨ Trik Penjumlahan Berulang (${q.a} × ${q.b}):</p>
+                        <p class="text-xs mb-2">Artinya ada <b>${q.a}</b> kelompok yang masing-masing berisi <b>${q.b}</b>:</p>
+                        <div class="bg-white p-2.5 rounded-xl font-display font-bold text-center text-indigo-800 border border-indigo-200">
+                            ${steps}
+                        </div>
+                    </div>
+                `;
+            } else {
+                const displayEq = q.eq || `${q.a || ''} × ${q.b || ''}`;
+                trickHtml = `
+                    <div class="bg-indigo-50 p-3.5 rounded-2xl border border-indigo-200">
+                        <p class="font-bold text-indigo-900 mb-1">💡 Strategi Penyelesaian (${pos.shortBadge}):</p>
+                        <p class="text-xs leading-relaxed">
+                            Perhatikan soal <b>${displayEq}</b> dengan teliti. Pecahkan angka menjadi puluhan dan satuan atau gunakan rumus dasar <b>${pos.shortBadge}</b> pada ${CURRICULUM_DATA[gameState.grade].gradeName}. Hitung perlahan langkah demi langkah!
+                        </p>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = trickHtml;
+            document.getElementById('helper-modal').classList.remove('hidden');
+        }
+
+        function closeHelperModal() {
+            playSound('click');
+            document.getElementById('helper-modal').classList.add('hidden');
+        }
+
+        // ==================== SERTIFIKAT & RESET ====================
+        function openCertificateModal() {
+            playSound('victory');
+            const curr = CURRICULUM_DATA[gameState.grade] || CURRICULUM_DATA[3];
+            document.getElementById('cert-player-name').textContent = gameState.playerName || "Penjelajah Hebat";
+            document.getElementById('cert-grade-badge').textContent = `Jenjang ${curr.gradeName} (${curr.fase}) • Kurikulum Merdeka`;
+            document.getElementById('cert-stars-count').textContent = `${gameState.stars} Bintang Emas`;
+            document.getElementById('certificate-modal').classList.remove('hidden');
+        }
+
+        function closeCertificateModal() {
+            playSound('click');
+            document.getElementById('certificate-modal').classList.add('hidden');
+        }
+
+        function confirmReset() {
+            playSound('click');
+            document.getElementById('reset-modal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            playSound('click');
+            document.getElementById('reset-modal').classList.add('hidden');
+        }
+
+        function resetGame() {
+            playSound('click');
+            gameState.unlockedPos = 0;
+            gameState.completedPos = [];
+            gameState.stars = 0;
+            syncCurrentStudentToAdmin(0, 0, 0);
+            logStudentActivity('start', `Mengulang petualangan dari awal (Sumatra)`);
+            document.getElementById('btn-open-cert').classList.add('hidden');
+            closeResetModal();
+            updateUI();
+        }
+
+        // ==================== PANEL LOGIN & PEMANTAUAN ADMIN / GURU (CLOUD SYNC) ====================
+        function getAdminStudents() {
+            return cloudStudentsList;
+        }
+
+        function getAdminLogs() {
+            return cloudLogsList;
+        }
+
+        function formatTimestamp(isoStr) {
+            try {
+                const d = new Date(isoStr);
+                return d.toLocaleString('id-ID', {
+                    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                });
+            } catch (e) {
+                return '-';
+            }
+        }
+
+        async function syncCurrentStudentToAdmin(correctDelta = 0, wrongDelta = 0, helperDelta = 0) {
+            if (!gameState.playerName) return;
+            const slugName = gameState.playerName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const key = `${slugName}_g${gameState.grade}`;
+            const nowIso = new Date().toISOString();
+            const posList = getPosDataForGrade(gameState.grade);
+            const currentPosObj = posList[Math.min(gameState.unlockedPos, posList.length - 1)];
+
+            let existing = cloudStudentsList.find(s => s.id === key);
+            const record = {
+                id: key,
+                name: gameState.playerName,
+                grade: gameState.grade,
+                roomCode: gameState.roomCode || (existing ? (existing.roomCode || '') : ''),
+                completedPos: [...gameState.completedPos],
+                unlockedPos: gameState.unlockedPos,
+                currentIsland: gameState.completedPos.length === 7
+                    ? 'Lulus (Merauke)'
+                    : (currentPosObj ? currentPosObj.island : 'Sumatra'),
+                stars: gameState.stars,
+                correctCount: (existing ? (existing.correctCount || 0) : 0) + correctDelta,
+                wrongCount: (existing ? (existing.wrongCount || 0) : 0) + wrongDelta,
+                helperCount: (existing ? (existing.helperCount || 0) : 0) + helperDelta,
+                lastActive: nowIso,
+                deviceUid: currentUser ? currentUser.uid : 'local-session'
+            };
+
+            // Perbarui cache lokal sesi agar langsung terlihat
+            const idx = cloudStudentsList.findIndex(s => s.id === key);
+            if (idx >= 0) {
+                cloudStudentsList[idx] = record;
+            } else {
+                cloudStudentsList.unshift(record);
+            }
+            if (isAdminAuthenticated) {
+                renderAdminDashboard();
+            }
+
+            // Simpan ke Cloud Lintas Perangkat
+            if (cloudReady && currentUser && db) {
+                try {
+                    const studentRef = doc(db, 'artifacts', appId, 'public', 'data', 'nusantara_students', key);
+                    await setDoc(studentRef, record, { merge: true });
+                } catch (err) {
+                    console.warn("Gagal menyinkronkan data siswa ke cloud:", err);
+                }
+            }
+        }
+
+        async function logStudentActivity(actionType, detailText) {
+            if (!gameState.playerName) return;
+            const logEntry = {
+                timestamp: new Date().toISOString(),
+                studentName: gameState.playerName,
+                grade: gameState.grade,
+                type: actionType,
+                detail: detailText,
+                deviceUid: currentUser ? currentUser.uid : 'local-session'
+            };
+
+            cloudLogsList.unshift(logEntry);
+            if (isAdminAuthenticated) {
+                renderAdminDashboard();
+            }
+
+            if (cloudReady && currentUser && db) {
+                try {
+                    const logsCol = collection(db, 'artifacts', appId, 'public', 'data', 'nusantara_logs');
+                    await addDoc(logsCol, logEntry);
+                } catch (err) {
+                    console.warn("Gagal mengirim log aktivitas ke cloud:", err);
+                }
+            }
+        }
+
+        function openAdminLoginModal() {
+            playSound('click');
+            document.getElementById('admin-login-error').classList.add('hidden');
+            if (isAdminAuthenticated) {
+                document.getElementById('admin-dashboard-modal').classList.remove('hidden');
+                renderAdminDashboard();
+                return;
+            }
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-login-modal').classList.remove('hidden');
+        }
+
+        function closeAdminLoginModal() {
+            playSound('click');
+            document.getElementById('admin-login-modal').classList.add('hidden');
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('admin-username').value.trim().toLowerCase();
+            const pass = document.getElementById('admin-password').value.trim();
+
+            if ((user === 'admin' || user === 'guru') && (pass === '1234' || pass === 'guru123')) {
+                playSound('victory');
+                isAdminAuthenticated = true;
+                document.getElementById('admin-login-modal').classList.add('hidden');
+                document.getElementById('admin-dashboard-modal').classList.remove('hidden');
+                syncCurrentStudentToAdmin(0, 0, 0);
+                renderAdminDashboard();
+            } else {
+                playSound('wrong');
+                document.getElementById('admin-login-error').classList.remove('hidden');
+            }
+        }
+
+        function logoutAdmin() {
+            playSound('click');
+            isAdminAuthenticated = false;
+            document.getElementById('admin-dashboard-modal').classList.add('hidden');
+        }
+
+        function renderAdminDashboard() {
+            const allStudents = getAdminStudents();
+            const allLogs = getAdminLogs();
+            const gradeFilter = document.getElementById('admin-grade-filter').value;
+            const searchQuery = document.getElementById('admin-search-input').value.trim().toLowerCase();
+
+            const totalStudents = allStudents.length;
+            const graduatedStudents = allStudents.filter(s => (s.completedPos || []).length === 7).length;
+            const totalStarsAll = allStudents.reduce((acc, s) => acc + (s.stars || 0), 0);
+            const avgStars = totalStudents > 0 ? (totalStarsAll / totalStudents).toFixed(1) : '0.0';
+
+            const totalCorrect = allStudents.reduce((acc, s) => acc + (s.correctCount || 0), 0);
+            const totalWrong = allStudents.reduce((acc, s) => acc + (s.wrongCount || 0), 0);
+            const totalAttempts = totalCorrect + totalWrong;
+            const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+
+            document.getElementById('stat-total-students').textContent = totalStudents;
+            document.getElementById('stat-graduated-students').textContent = graduatedStudents;
+            document.getElementById('stat-avg-stars').textContent = avgStars;
+            document.getElementById('stat-accuracy').textContent = `${accuracy}%`;
+
+            const filteredStudents = allStudents.filter(s => {
+                const matchGrade = gradeFilter === 'all' || String(s.grade) === gradeFilter;
+                const matchName = !searchQuery || s.name.toLowerCase().includes(searchQuery) || (s.roomCode && s.roomCode.toLowerCase().includes(searchQuery));
+                return matchGrade && matchName;
+            });
+
+            document.getElementById('admin-student-count-badge').textContent = `${filteredStudents.length} Siswa`;
+
+            const tbody = document.getElementById('admin-students-tbody');
+            if (filteredStudents.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-slate-400 font-bold">
+                            Belum ada data siswa yang sesuai filter. Siswa yang mulai berlayar akan otomatis tercatat di sini.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = filteredStudents.map(s => {
+                    const doneCount = (s.completedPos || []).length;
+                    const pct = Math.round((doneCount / 7) * 100);
+                    const isLulus = doneCount === 7;
+                    const roomTag = s.roomCode ? `<span class="block text-[10px] font-extrabold text-indigo-700 mt-0.5">Ruang: ${s.roomCode}</span>` : '';
+                    return `
+                        <tr class="hover:bg-indigo-50/40 transition">
+                            <td class="py-3 px-4 font-extrabold text-slate-800">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-display text-xs">
+                                        ${s.name.charAt(0).toUpperCase()}
+                                    </span>
+                                    <span>${s.name}</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="bg-amber-100 text-amber-900 font-bold text-xs px-2.5 py-1 rounded-lg border border-amber-200">
+                                    Kelas ${s.grade} SD
+                                </span>
+                                ${roomTag}
+                            </td>
+                            <td class="py-3 px-4 font-semibold text-slate-700">${s.currentIsland}</td>
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                                        <div class="${isLulus ? 'bg-emerald-500' : 'bg-indigo-500'} h-2.5 rounded-full" style="width: ${pct}%"></div>
+                                    </div>
+                                    <span class="text-xs font-extrabold ${isLulus ? 'text-emerald-600' : 'text-slate-700'}">${doneCount}/7</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 font-display font-bold text-amber-600">⭐ ${s.stars || 0}/21</td>
+                            <td class="py-3 px-4 text-xs font-bold">
+                                <span class="text-emerald-600">${s.correctCount || 0} Benar</span> •
+                                <span class="text-rose-600">${s.wrongCount || 0} Salah</span>
+                            </td>
+                            <td class="py-3 px-4 text-xs text-slate-500 font-semibold">${formatTimestamp(s.lastActive)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            const filteredLogs = allLogs.filter(l => {
+                const matchGrade = gradeFilter === 'all' || String(l.grade) === gradeFilter;
+                const matchName = !searchQuery || l.studentName.toLowerCase().includes(searchQuery);
+                return matchGrade && matchName;
+            }).slice(0, 30);
+
+            const logsContainer = document.getElementById('admin-logs-list');
+            if (filteredLogs.length === 0) {
+                logsContainer.innerHTML = `<p class="py-6 text-center text-xs font-bold text-slate-400">Belum ada riwayat aktivitas tercatat.</p>`;
+            } else {
+                const badgeMap = {
+                    start: { icon: '⛵', bg: 'bg-sky-100 text-sky-800', label: 'Mulai' },
+                    correct: { icon: '✅', bg: 'bg-emerald-100 text-emerald-800', label: 'Benar' },
+                    wrong: { icon: '❌', bg: 'bg-rose-100 text-rose-800', label: 'Salah' },
+                    complete_pos: { icon: '🏆', bg: 'bg-amber-100 text-amber-900', label: 'Selesai Pos' },
+                    helper: { icon: '💡', bg: 'bg-indigo-100 text-indigo-800', label: 'Bantuan' },
+                    grade_change: { icon: '📚', bg: 'bg-purple-100 text-purple-800', label: 'Ganti Kelas' }
+                };
+                logsContainer.innerHTML = filteredLogs.map(log => {
+                    const meta = badgeMap[log.type] || { icon: '📌', bg: 'bg-slate-100 text-slate-700', label: 'Info' };
+                    return `
+                        <div class="p-2.5 hover:bg-slate-50 rounded-xl flex items-center justify-between gap-3 text-xs">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="px-2 py-1 rounded-lg font-bold shrink-0 ${meta.bg}">${meta.icon} ${meta.label}</span>
+                                <div class="truncate">
+                                    <span class="font-extrabold text-slate-800">${log.studentName}</span>
+                                    <span class="text-slate-400 font-bold">(Kls ${log.grade})</span>:
+                                    <span class="text-slate-600 font-semibold">${log.detail}</span>
+                                </div>
+                            </div>
+                            <span class="text-[11px] text-slate-400 font-bold shrink-0">${formatTimestamp(log.timestamp)}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        async function clearActivityLogs() {
+            playSound('click');
+            const toDelete = [...cloudLogsList];
+            cloudLogsList = [];
+            renderAdminDashboard();
+
+            if (cloudReady && currentUser && db) {
+                try {
+                    for (const item of toDelete) {
+                        if (item.docId) {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'nusantara_logs', item.docId));
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Gagal menghapus sebagian log di cloud:", err);
+                }
+            }
+        }
+
+        function exportAdminCSV() {
+            playSound('click');
+            const students = getAdminStudents();
+            const headers = ['Nama Siswa', 'Kelas SD', 'Ruang / Rombel', 'Pos Terakhir', 'Pulau Selesai (dari 7)', 'Total Bintang', 'Jawaban Benar', 'Jawaban Salah', 'Bantuan Dipakai', 'Aktivitas Terakhir'];
+            const rows = students.map(s => [
+                `"${s.name.replace(/"/g, '""')}"`,
+                `Kelas ${s.grade} SD`,
+                `"${(s.roomCode || '-').replace(/"/g, '""')}"`,
+                `"${s.currentIsland}"`,
+                (s.completedPos || []).length,
+                s.stars || 0,
+                s.correctCount || 0,
+                s.wrongCount || 0,
+                s.helperCount || 0,
+                `"${formatTimestamp(s.lastActive)}"`
+            ]);
+            const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Laporan_Siswa_Nusantara_Math_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ==================== NAVIGASI TAB ADMIN, LINK SISWA & MANAJEMEN BANK SOAL ====================
+        function switchAdminTab(tabName) {
+            playSound('click');
+            const tabs = ['monitor', 'link', 'questions'];
+            tabs.forEach(t => {
+                const panel = document.getElementById(`admin-tab-${t}`);
+                const btn = document.getElementById(`admin-tab-btn-${t}`);
+                if (!panel || !btn) return;
+                if (t === tabName) {
+                    panel.classList.remove('hidden');
+                    btn.className = "flex-1 py-2.5 px-4 rounded-xl font-display font-bold text-xs sm:text-sm bg-indigo-600 text-white shadow transition flex items-center justify-center gap-1.5";
+                } else {
+                    panel.classList.add('hidden');
+                    btn.className = "flex-1 py-2.5 px-4 rounded-xl font-display font-bold text-xs sm:text-sm bg-slate-100 hover:bg-indigo-50 text-slate-700 transition flex items-center justify-center gap-1.5";
+                }
+            });
+
+            if (tabName === 'link') {
+                updateGeneratedStudentLink();
+            } else if (tabName === 'questions') {
+                renderAdminQuestionManager();
+            } else {
+                renderAdminDashboard();
+            }
+        }
+
+        function updateGeneratedStudentLink() {
+            const gradeEl = document.getElementById('link-gen-grade');
+            const roomEl = document.getElementById('link-gen-room');
+            const studentEl = document.getElementById('link-gen-student');
+            const lockEl = document.getElementById('link-gen-lock');
+            const outEl = document.getElementById('generated-student-url');
+            if (!gradeEl || !outEl) return;
+
+            const url = new URL(window.location.href.split('?')[0]);
+            url.searchParams.set('kelas', gradeEl.value);
+            if (roomEl && roomEl.value.trim()) {
+                url.searchParams.set('ruang', roomEl.value.trim());
+            }
+            if (studentEl && studentEl.value.trim()) {
+                url.searchParams.set('siswa', studentEl.value.trim());
+            }
+            if (lockEl && lockEl.checked) {
+                url.searchParams.set('kunci', '1');
+            }
+            outEl.value = url.toString();
+            const fb = document.getElementById('copy-link-feedback');
+            if (fb) fb.classList.add('hidden');
+        }
+
+        function copyGeneratedStudentLink() {
+            playSound('click');
+            const outEl = document.getElementById('generated-student-url');
+            if (!outEl) return;
+            outEl.select();
+            outEl.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                const fb = document.getElementById('copy-link-feedback');
+                if (fb) fb.classList.remove('hidden');
+            } catch (e) {
+                console.warn("Gagal menyalin link:", e);
+            }
+        }
+
+        function renderAdminQuestionManager() {
+            const grade = parseInt(document.getElementById('qm-grade-select').value, 10) || 3;
+            const posId = parseInt(document.getElementById('qm-pos-select').value, 10) || 0;
+            const posInfo = BASE_ISLANDS[posId];
+            const questions = getQuestionsForGradeAndPos(grade, posId);
+            const isCustom = Boolean(customQuestionsStore[`g${grade}_p${posId}`]);
+
+            document.getElementById('qm-list-header').textContent = `Soal Kelas ${grade} SD • Pos ${posId + 1}: ${posInfo.island} ${isCustom ? '(Kustom Admin)' : '(Bawaan)'}`;
+            document.getElementById('qm-count-badge').textContent = `${questions.length} Soal`;
+
+            const container = document.getElementById('qm-questions-list');
+            container.innerHTML = questions.map((q, idx) => {
+                const eqDisplay = q.eq ? q.eq : `${q.a} × ${q.b} = ?`;
+                return `
+                    <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="bg-indigo-100 text-indigo-800 font-extrabold text-xs px-2.5 py-0.5 rounded-lg">Soal #${idx + 1}</span>
+                                <span class="bg-sky-100 text-sky-900 font-display font-bold text-xs px-2.5 py-0.5 rounded-lg">${eqDisplay}</span>
+                                <span class="bg-emerald-100 text-emerald-800 font-extrabold text-xs px-2.5 py-0.5 rounded-lg">Jawaban: ${q.ans}</span>
+                            </div>
+                            <p class="text-xs sm:text-sm font-bold text-slate-800">${q.text}</p>
+                            <p class="text-[11px] font-semibold text-slate-500">Pilihan: [${(q.opts || []).join(', ')}] • Visual: ${q.groups || 4} kelompok × ${q.perGroup || 4} ${q.emoji || '⭐'}</p>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="openQuestionEditorModal(${idx})" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold text-xs px-3 py-2 rounded-xl transition">
+                                ✏️ Edit
+                            </button>
+                            <button type="button" onclick="deleteQuestionAtIndex(${idx})" class="bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 font-bold text-xs px-3 py-2 rounded-xl transition">
+                                🗑️ Hapus
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openQuestionEditorModal(editIdx) {
+            playSound('click');
+            const grade = parseInt(document.getElementById('qm-grade-select').value, 10) || 3;
+            const posId = parseInt(document.getElementById('qm-pos-select').value, 10) || 0;
+            const posInfo = BASE_ISLANDS[posId];
+            const questions = getQuestionsForGradeAndPos(grade, posId);
+
+            document.getElementById('qe-edit-index').value = String(editIdx);
+            document.getElementById('qe-form-error').classList.add('hidden');
+
+            if (editIdx >= 0 && questions[editIdx]) {
+                const q = questions[editIdx];
+                document.getElementById('qe-modal-title').textContent = `Edit Soal #${editIdx + 1} (${posInfo.island})`;
+                document.getElementById('qe-text').value = q.text || '';
+                document.getElementById('qe-eq').value = q.eq ? q.eq : `${q.a} × ${q.b} = ?`;
+                document.getElementById('qe-ans').value = q.ans;
+                document.getElementById('qe-opts').value = (q.opts || []).join(', ');
+                document.getElementById('qe-groups').value = q.groups || 4;
+                document.getElementById('qe-pergroup').value = q.perGroup || 4;
+                document.getElementById('qe-emoji').value = q.emoji || posInfo.icon;
+            } else {
+                document.getElementById('qe-modal-title').textContent = `Tambah Soal Baru (Kelas ${grade} • ${posInfo.island})`;
+                document.getElementById('qe-text').value = '';
+                document.getElementById('qe-eq').value = '';
+                document.getElementById('qe-ans').value = '';
+                document.getElementById('qe-opts').value = '';
+                document.getElementById('qe-groups').value = 4;
+                document.getElementById('qe-pergroup').value = 4;
+                document.getElementById('qe-emoji').value = posInfo.icon;
+            }
+
+            document.getElementById('question-editor-modal').classList.remove('hidden');
+        }
+
+        function closeQuestionEditorModal() {
+            playSound('click');
+            document.getElementById('question-editor-modal').classList.add('hidden');
+        }
+
+        async function persistQuestionsToCloud(grade, posId, updatedList) {
+            const customKey = `g${grade}_p${posId}`;
+            customQuestionsStore[customKey] = updatedList;
+            renderAdminQuestionManager();
+            if (!document.getElementById('welcome-screen').classList.contains('hidden') === false) {
+                updateUI();
+            }
+
+            if (cloudReady && currentUser && db) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'nusantara_custom_questions', customKey);
+                    await setDoc(docRef, {
+                        grade,
+                        posId,
+                        questions: updatedList,
+                        updatedAt: new Date().toISOString()
+                    });
+                } catch (err) {
+                    console.warn("Gagal menyimpan bank soal ke cloud:", err);
+                }
+            }
+        }
+
+        async function saveEditedQuestion(e) {
+            e.preventDefault();
+            const grade = parseInt(document.getElementById('qm-grade-select').value, 10) || 3;
+            const posId = parseInt(document.getElementById('qm-pos-select').value, 10) || 0;
+            const editIdx = parseInt(document.getElementById('qe-edit-index').value, 10);
+
+            const text = document.getElementById('qe-text').value.trim();
+            const eq = document.getElementById('qe-eq').value.trim();
+            const ans = parseFloat(document.getElementById('qe-ans').value);
+            const rawOpts = document.getElementById('qe-opts').value.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+            const groups = Math.min(Math.max(parseInt(document.getElementById('qe-groups').value, 10) || 4, 1), 10);
+            const perGroup = Math.min(Math.max(parseInt(document.getElementById('qe-pergroup').value, 10) || 4, 1), 10);
+            const emoji = document.getElementById('qe-emoji').value.trim() || '⭐';
+
+            const errBox = document.getElementById('qe-form-error');
+            if (rawOpts.length < 2) {
+                errBox.textContent = "Masukkan minimal 2 pilihan angka yang dipisahkan dengan tanda koma.";
+                errBox.classList.remove('hidden');
+                return;
+            }
+            if (!rawOpts.includes(ans)) {
+                rawOpts[0] = ans;
+            }
+
+            const newQuestionObj = {
+                eq,
+                text,
+                ans,
+                opts: rawOpts,
+                groups,
+                perGroup,
+                emoji
+            };
+
+            const currentList = [...getQuestionsForGradeAndPos(grade, posId)];
+            if (editIdx >= 0 && editIdx < currentList.length) {
+                currentList[editIdx] = newQuestionObj;
+            } else {
+                currentList.push(newQuestionObj);
+            }
+
+            playSound('victory');
+            closeQuestionEditorModal();
+            await persistQuestionsToCloud(grade, posId, currentList);
+        }
+
+        async function deleteQuestionAtIndex(idx) {
+            const grade = parseInt(document.getElementById('qm-grade-select').value, 10) || 3;
+            const posId = parseInt(document.getElementById('qm-pos-select').value, 10) || 0;
+            const currentList = [...getQuestionsForGradeAndPos(grade, posId)];
+
+            if (currentList.length <= 1) {
+                const headerEl = document.getElementById('qm-list-header');
+                if (headerEl) {
+                    headerEl.textContent = "⚠️ Minimal harus tersisa 1 soal pada setiap pos pulau!";
+                }
+                playSound('wrong');
+                return;
+            }
+
+            playSound('click');
+            currentList.splice(idx, 1);
+            await persistQuestionsToCloud(grade, posId, currentList);
+        }
+
+        async function resetCustomQuestionsForPos() {
+            playSound('click');
+            const grade = parseInt(document.getElementById('qm-grade-select').value, 10) || 3;
+            const posId = parseInt(document.getElementById('qm-pos-select').value, 10) || 0;
+            const customKey = `g${grade}_p${posId}`;
+
+            delete customQuestionsStore[customKey];
+            renderAdminQuestionManager();
+
+            if (cloudReady && currentUser && db) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'nusantara_custom_questions', customKey));
+                } catch (err) {
+                    console.warn("Gagal mereset soal kustom di cloud:", err);
+                }
+            }
+        }
+
+        // Ekspos fungsi ke window agar atribut onclick di HTML dapat memanggilnya di dalam script type="module"
+        Object.assign(window, {
+            selectWelcomeGrade,
+            startAdventure,
+            changeGradeFromHeader,
+            toggleBGM,
+            toggleTTS,
+            openCertificateModal,
+            closeCertificateModal,
+            openAdminLoginModal,
+            closeAdminLoginModal,
+            handleAdminLogin,
+            logoutAdmin,
+            renderAdminDashboard,
+            clearActivityLogs,
+            exportAdminCSV,
+            switchAdminTab,
+            updateGeneratedStudentLink,
+            copyGeneratedStudentLink,
+            renderAdminQuestionManager,
+            openQuestionEditorModal,
+            closeQuestionEditorModal,
+            saveEditedQuestion,
+            deleteQuestionAtIndex,
+            resetCustomQuestionsForPos,
+            confirmReset,
+            closeResetModal,
+            resetGame,
+            openPosModal,
+            closeGameModal,
+            readCurrentQuestionAloud,
+            openHelperModal,
+            closeHelperModal,
+            readFactAloud,
+            closeFactAndSail,
+            checkAnswer
+        });
+    </script>
+</body>
+</html>
